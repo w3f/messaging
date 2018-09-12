@@ -1,0 +1,8 @@
+
+
+In fact, there are interesting solutions inspired by hash based signatures that almost gives us the required properties:  Along with her VRF key, Alice commits to random data x consisting of pairs of 128 bit numbers.  Alice now evaluates her VRF like normal, but uses m bits of output to select which of each pair to hash in with the ful VRF output, so
+  VRF_i(seed) = H(s_i ++ x[0][s_i[0]] ++ .. ++ x[m][s_i[m]])  where  s_i = H(sk_A H_1(seed) ++ i)
+Alice can safely reveal x[j][s_i[j]] and H(x[j][1 - s_i[j]]) because her time window for using x reamins too small for an adversary to expose both x[j][0] and x[j][1] for many j.  In the first 
+
+We expose half the remaining unexposed x[j][?] with each winning packet, but if winning packets are rare then this might be viable, even though the asymptotics sound as bad as hash based signatures.
+
