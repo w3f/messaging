@@ -1,0 +1,40 @@
+
+
+### Alice feeds her VRF a network friendly time 
+
+We do not want Alice to spam cover traffic by sampling her VRF across a massive number of time slots either, so the times with which she seeds her VRF must be constrained.  We thus expect nodes validating the lottery winning packets should reject excessive clock skew or otherwise constrain the allowing timing for Alice's packets.  
+
+We must first worry about large scale issues that impact what goes into Alice's VRF:  We could use recent block heights here, except Alice is likely to be an extremely lite client, maybe even if Alice were a guard or aggregation point.  There is a case for keeping any chain somewhat distant, ala Whisper, but our replay protection commitments from relays likely requires some chain presence, so maybe relays can learn block heights.  We have discussed network timing information for polkadot's block production, etc. too.  There are designs that give us signed messages with time information from different nodes, which sounds more amenable if users cover traffic wins the lottery.
+
+### Alice must evaluate her VRF sparingly
+
+We should probably require that Alice seed her VRF only with rough time to further limit her time slots. 
+
+In Loopix, all traffic categories are exponentially distributed \Exp(\lambda), normally using ziggurat tables, including traffic originating from both user and relays.  We observe that a VRF producing winning output by VRF(momentary_seed) < x is already exponentially distributed.  It's too much computation to run a VRF say every second on a mobile device though, so honest users cannot do this and only attackers do.  
+
+We could stretch one VRF output into many infrequently verified VRF outputs by sampling a real VRF once or infrequently and seeding a CSPRNG like ChaCha20.  In principle, this gives random number outputs with similar properties, including verifiability and independence as far as probabilistic polynomial time adversaries see (TODO: cite old/original VRF paper).  
+
+In stretching our VRF, we must not reveal the original VRF output since we do not want to reveal anything about other time slots, possibly including real messages depending upon the cover traffic strategy.  Instead, Alice reveals a lottery winner by producing a zero-knowledge proof that her exponentially distributed samples were computed correctly from the original VRF with her key, but now without revealing that actual VRF output.  We might use a simple DLEQ proof that require only a couple curve points, since Alice's VRF is merely a BLS signature.  See:  
+  https://blog.cloudflare.com/privacy-pass-the-math/
+  https://github.com/privacypass/challenge-bypass-server/blob/master/crypto/dleq.go
+  https://github.com/privacypass/challenge-bypass-extension/blob/master/scripts/crypto.js#L295
+It's much harder to prove the stream cipher output is correct, although zkSNARKs and bulletproofs sound plausible here, and maybe even witness indistinguishability proofs like ZAPS work.  We may keep separate the DLEQ proof and stream cipher proof by sharing only a commitment between them.
+
+We might ask if our stream cipher output could be optimised for doing the zero-knowlege proofs, while retaining independence, security, etc.  If we only want to evaluate the VRF once every m time units, so that i < m, then we might try 
+  VRF_i(epoch_seed) = H( sk_A H_1(epoch_seed) + sk_A H_1(i) )
+We reveal the aggregated signature sk_A ( H_1(epoch_seed) + H_1(i) ), and epoch_seed and i are known, so we require only a signature verification, not a DLEQ proof.  Importantly, we must argue that this hides the non-aggregated signatures sk_A H_1(epoch_seed) and sk_A H_1(i), as otherwise an adversary could collect sk_A H_1(i) terms to determine non winning packet timings.  
+
+Some heavier zero-knowledge techniques have post quantum blinding, which makes our VRF post-quantum if the certificate is blinded too, but not this simple signature based scheme.  Also, there is a considerable precompute required to produce sk_A H_1(i) for i < m, while heavier zero-knowlege techniques incur serious computational overhead only when their packets win.
+
+In this vein, these are roughly verifiable pseudo-random sequence generators (VPRGs) described in section 5.2 on page 19 of this ZAPS paper:  http://www.wisdom.weizmann.ac.il/~naor/PAPERS/zap.pdf
+There are also ideas inspired by hash based signatures as well, like committing to f(m) pairs of 128 bit numbers x[j][b] for j < f(m) and b=0,1 and using the "stream cipher" given by
+  H(x[0][bs[0]] ++ .. x[m-1][bs[m-1]] ++ bs) where bs = H(sk_A G_2 ++ i)
+but this also requires considerable precomputation since naively f(m) is exponential in m.
+
+I suppose Intel SGX and Arm TrustZone might prove useful here too.
+
+As an aside, adding up all Alice's previous samples gives an Erlang(n,\lambda) distribution.  We know 
+  \Exp(\lambda)  ~  {-1 \over \lambda} \ln U  and
+  \Erlang(n,\lambda)  ~  {-1 \over \lambda} \ln \Pi_i^n U_i
+where U_i are uniform on the open unit interval (0,1).  If we could obtain these U_i directly as the output of a multiplicatively homomorphic VRF then we could maybe prove this efficiently, but this sounds hard and it must still begin somewhere.  
+

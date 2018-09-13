@@ -1,0 +1,153 @@
+
+
+
+On 12.09.18 19:26, Michele Orrù wrote
+> My supervisor (Georg Fuchsbauer) proposes the following simple solution:
+>
+> Assume you have the following algorithms:
+>
+> VRF.K() -> (sk, pk)
+> the key generation algorithm. Note: pk is a commitment to sk.
+>
+> VRF.G(sk, x) -> y
+> The pseudo-random generation function. Note: x is an input.
+>
+> VRF.P(sk, x , y) -> π
+> The proving algorithm, that gives a proof that y is the VRF on (sk, x).
+>
+> VRF.V(pk, x, y, π) -> bool
+> The verification algorithm that returns true if y is the VRF evauated
+> correctly on x for key corresponding to pk.
+>
+>
+>
+> You asked:
+> I need a JubJub like trick for stream ciphers to stretch a VRF:
+> I want the output of a VRF to be kept secret and fed into a stream
+> cipher to produce a lot VRF output and I want to reveal only one block
+> of this VRF output. A simple DLEQ proof can be used on the VRF itself
+> buy I want something simpler than a SNARK for the stream cipher.
+> I don't want to comprise in the stream cipher speed though, so maybe a
+> heavier zk construct like SNARKs are worth it.
+>
+>
+> Then, just use the VRF in counter mode:
+>
+> VRF.G(sk, 0x01) -------------------------- VRF.G(sk, N) ---
+>   ⊕                                             ⊕
+> |DATA_BLOCK_01|------------DATA------------|DATA_BLOCK_N| ----
+>
+>
+> And then when you want to prove that the N-th block of the ciphertext is
+> an encrypton of DATA_BLOCK_N, you just disclose
+> y and π = VRF.P(sk, N, y)
+
+Right, this works of course, but..
+
+> Is there anything wrong with this?
+
+We normally build VRFs from "securely deterministic" signature schemes,
+so RSA-FDH, like the second paper you linked, or pairing based
+signatures, like BLS or the first paper you linked.
+
+These are rather slow primitives, so the VRFs have some appreciable
+cost.  I'd think VRFs could be built without pairings, but probably this
+goes into zero-knowledge land, although maybe not too badly.
+
+VRF stretching would mean turning one VRF into many, like you do, but
+super cheaply, so say without exponentiations.  In my case, it's okay to
+push the complexity onto the proof stage because we almost never verify
+the VRF output we produce.
+
+There is a conceptually easy way to do this:  I use my VRF to seed a
+stream cipher and do a zero-knowledge proof that I evaluated the stream
+cipher on the VRF output and with the correct offset
+  VRF.G_i(sk, x) = ChaCha20(VRF.G(sk, x), i)
+  VRF.P_i(sk, x , y) gives a zero-knowledge proof that
+    exists k = VRF.P(sk, x) such that y = ChaCha20(k, i)
+zkSNARKs are slightly more complex than I'd like too however, even if
+performance is no problem.
+
+
+I'll explain the real problem:
+
+We're try to make proof-of-onion (PoO) work, so we have a mix network in
+which occasionally users must deanonymize random cover traffic packets.
+If all nodes routed those packet correctly, then they all get paid.
+
+We do not want users and nodes colluding to route cover traffic only
+through specific nodes, so as to pay only those nodes.  In fact, any
+proof-of-work is a malicious mining attack on proof-of-onion!
+I've explained more here :
+https://github.com/w3f/messaging/blob/master/paying/probabalistic.md
+
+We therefore make users generate their cover traffic using some VRFs
+whose key they previously committed to, maybe buying a threshold blind
+signed certificate, which works fine.  We also require that users choose
+when they send cover traffic packets using this VRF, which becomes more
+complex.  We cannot easily employ most distribution sampling tricks
+because we do not wish to reveal any information about previous time
+slots, the VRF key age, etc.
+
+Instead, we observe that VRF.G(sk,time) < epsilon should be
+exponentially distributed, so we generate cover traffic by sampling VRFs
+all day long.  I do not believe doing a 380 bit curve point
+exponentiation every second or so is a good use of mobile phone battery
+however.
+
+If we stretch the VRF with zkSNARKs then the user's device generates a
+small SNARK only rarely, maybe every 10 minutes, maybe once per day, but
+code complexity, trusted setup, etc.
+
+
+In fact, there is an easier non-cryptographic solution:  Users generate
+cover traffic packet timings anyway the like, but they can only generate
+so many per 10 min or hour or so.  Exp(lambda) has variance lambda^{-2}
+which looks okay.  In principle it's okay if some cover traffic packets
+could never pay.  I think a bad guard node could not count packets and
+starts dropping because the user's machine could spread around the
+payable ones however it likes.  It just took me a while to notice
+because I got obsessed with the cryptography
+
+> Oh, since I don't know much about VRF I asked for a simple and efficient
+> VRF; he suggested me to look at: https://eprint.iacr.org/2004/310.pdf .
+
+I need to understand the crazy assumptions in this paper and if it's
+really more efficient than say BLS.
+
+> Euh… wrong paper: https://eprint.iacr.org/2017/099.pdf
+
+I'm happy to see a paper that acutally works this out for RSA-FDH, thanks!
+
+RSA-FDH might work if you use a small RSA modulus but hide the RSA
+public key behind a zero-knowledge proof, maybe making it post quantum
+even.  We don't require so much economic security here, merely enough
+that factoring costs more than you'd win.
+
+
+See I do get to play with fun stuff here at Web 3!  :P
+
+Jeff
+
+p.s.  An interesting question is to build a more efficient VRF using
+some simple zk stuff without pairings.
+
+
+
+
+
+
+On 12.09.18 21:22, Jeff Burdges wrote:
+> In fact, there is an easier non-cryptographic solution:  Users generate
+> cover traffic packet timings anyway the like, but they can only generate
+> so many per 10 min or hour or so.  Exp(lambda) has variance lambda^{-2}
+> which looks okay.  In principle it's okay if some cover traffic packets
+> could never pay.  I think a bad guard node could not count packets and
+> starts dropping because the user's machine could spread around the
+> payable ones however it likes.  It just took me a while to notice
+> because I got obsessed with the cryptography
+
+Just to work out the details:  Pond sends a message on average every 5 min., so 288 messages per day, including cover.  If we shorten that to every 30 seconds then then we get 2880 messages per day, or 120 per hour.  We almost no variance so we can just let nodes use
+  VRF(sk, network_seed ++ i)  for  i<120.
+It'd be nice to reduce that of course, but each of those packets also costs 10 curve25519 operations, assuming 10 hops, so the VRF is not the only guilty party. 
+
