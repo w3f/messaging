@@ -9,17 +9,31 @@ We've one major technical decision between payment channels or blinded tokens, o
 
 We can solve anonymity problems quite effectively with blind signed tokens.  Any known blinded token scheme requires the user withdraw numerous tokens and encrypt one token to each hop in the sphinx packet's routing information.  We might find some scheme that incorporates the sphinx packet's public key and reblinding operation, but this sounds tricky.
 
+### Blind signature schemes
+
 There are two flavours of blinded tokens worth considering:
 
-First, bind signatures permit another party like the relay being paid to validate the token's correctness.  I believe simple blind Schnorr signatures were broken, and the fix yields a huge signature, so the obvious blind signatures schemes are RSA which sounds too large, and pairing based schemes like BLS or the Short Randomizable Signatures by Pointcheval and Sanders.  I believe BLS gives optimal size, aggregation, and threshold properties, including that nodes can aggregate signatures from numerous packets.  I've explored SRS looking for possible integration with the packet format, but no luck so far.
+First, bind signatures permit another party like the relay being paid to validate the token's correctness.  I believe simple blind Schnorr signatures were broken, and the fix yields a huge signature, so the obvious blind signatures schemes are RSA which sounds too large, and pairing based schemes like BLS or the Short Randomizable Signatures (SRS) by Pointcheval and Sanders.  I believe BLS gives optimal size, aggregation, and threshold properties, including that nodes can aggregate signatures from numerous packets.  I've explored SRS looking for possible advantages in integration with the packet format, but no luck so far, and I did not explore questions like aggregation.
 
 Second, there are schemes in which only the issuer can verify the token, like oblivious PRFs or perhaps algebraic MACs.  We consider all blind signature options like BLS to be slow, but not compared to network round trips for coin depositing.  It's plausible nodes must do this traffic quickly anyways though.  I suppose this seriously complicates actually using any threshold scheme, but perhaps the verification could be designed to avoid threshold entirely.
 
-We currently envision that BLS signatures sound optimal for blind signed tokens, which costs relays issuers+1 pairings per payment aggregation period.  We note however that payment aggregation periods should be long enough for relays to drop non-paying packets.  We'd likely make issuers=1 by using threshold signing, probably a DFinity style VSS + VRF, as PVSS per signature sounds expensive.  Aside from thresholds, we could consider individual issuers with a staking scheme or even combined stake and threshold issuer pools.  
+We currently envision that BLS signatures for blind signed tokens because relays spend |issuers|+1 pairings per payment aggregation period.  We note however that payment aggregation periods should be long enough for relays to drop non-paying packets.  
 
 We do need a traitor tracing algorithm in this aggregate BLS signature verification code too, which creates a DoS vector.  We do currently expect to need this traitor tracing algorithm anywhere in polkadot, but things change.
 
 As an optimisation, we might explore the rich literature on batch issuing blind signed tokens, but this sounds tricky without violating the one-more forgery / known target inversion assumptions required for blind signatures.
+
+### Issuers
+
+We must minimize issuers because they fiber the anonymity set.  We could maybe make issuers=1 by using threshold signing, maybe a DFinity style VSS + VRF, as PVSS per signature sounds expensive.  
+
+As a rule, we envision blind signatures schemes requiring massive stake for normal payments, so an issuer holds stake equal to its total expected payout from which all payouts occur, while all payments by customers are held by some smart contract until the coins validity expires, so that customers can claim refunds if they never spent their token.  In principle threshold blind signatures might avoid this stake.  Aside from thresholds, we could consider individual issuers with a staking scheme or even combined stake and threshold issuer pools. 
+
+We only care about routing payments here though, so users need not necessarily be eligible for refunds.  We thus do not require such strong defenses for either funds not being unjustifiably issued or for users obtaining refunds.  It follows nicer methods should exist than stake or thresholds.  If we simply issue blind signed tokens, then issuer nodes could mint as many tokens as they like though, thus cheating the network but not users.
+
+We must still limit the issuer nodes by requiring they win some game.  We might say tax issued tokens based on the ranking of the issuer node according to their ranking by a local VRF.  In the same vein, we might avoid stake or thresholds by making the issuer nodes rewards proportional to the number of tokens paid for minus the number of tokens redeemed, but this requires a method for counting the tokens redeemed. 
+
+It's worth exploring the economic games here to try to avoid stake or thresholds. 
 
 ## Payment channels
 
