@@ -94,7 +94,7 @@ We want running nodes to always be the most economical method to acquire tokens.
 
 We face a hurdle that cover traffic senders could bias their cover traffic towards their own nodes, thereby favouring themselves when their own cover traffic packets win the lottery.
 
-At first blush, there is a relatively straightforward sounding scheme for route selection, given some strong assumptions on timing and consensus:  We consider some node Alice that generates cover traffic eligible to win the lottery.  Alice has a VRF key v to which she is committed.  Alice seeds her VRF with some representative for the current time to produce a verifiable CSPRNG, probably by using the output to seed ChaCha20.  Alice uses this CSPRNG to sample her route from the network consensus.  
+At first blush, there is a relatively straightforward sounding scheme for route selection, given some strong assumptions on timing and network view:  We consider some node Alice that generates cover traffic eligible to win the lottery.  Alice has a VRF key v to which she is committed.  Alice seeds her VRF with some representative for the current time to produce a verifiable CSPRNG, probably by using the output to seed ChaCha20.  Alice uses this CSPRNG to sample her route from the network view.  
 
 We discuss several complications here and propose solutions.  These solutions have notable code complexity overhead, but they only arise when Alice's cover packet wins the payment lottery, giving them acceptable performance even for slow solutions.  We suggest initially addressing these concerns with three dirty Intel SGX and Arm TrustZone hacks, and requiring that users clocks not be too skewed, but even this could wait until the network sees significant adoption.
 
@@ -110,17 +110,46 @@ We could certify Alice's VRF key from another node using a blind signed certific
 
 In fact, our easiest solution would likely be to certify VRF keys using the machine itself as a unique resource, via Intel SGX and Arm TrustZone.  These lack strong threat models but they suffice for preventing malicious mining.  If we run the VRF outside the trust boundary, then Alice could employ malware to mint VRF keys, but she could equally well create numerous phone number registrations with Android malware. 
 
-### Alice should sample the full consensus 
+### Alice should sample the full network fairly
 
-If Alice has the full consensus, with weightings by node capacity and reliability eventually, then she could sample it using her VRF easily.  We expect this to be the case if only relays generate cover traffic that wins.
+Imagine first that Alice pays for registering her VRF key, but chooses network nodes however she likes.  If she controls relays in each layer, then she could sacrifice her anonymity to extract free services from relays owned by others.  We do not consider this an unpleasant but not necessarily catastrophic attack.  We might ensure Alice's nodes contribute network services, but this requires punishments.
 
-We know the consensus eventually becomes the scaling bottle neck for any anonymity systems, which bodes poorly for users naively generating cover traffic that results in payments.  Right now, Tor is already stretching their consensus by distributing the full list of 6000 nodes to 2 million users.  We might distribute more frequently since relays' keys rotate.
+If instead Alice pays nothing, then Alice could pick routes that pay her own nodes.  We thus want Alice's packet build algorithm to sample random nodes from the network fairly and that this fairness be verifiable.
 
-There is a larger research project around doing partial consensus information securely, or using gossiped node details, but if we have a partial consensus scheme then we can sample it securely using a VRF, albeit with considerable complexity.  Alice commits to her view of the consensus when she (re)registers her VRF key, which permits her learning about more nodes, but sadly prevents her from including them into her consensus sampling pool quickly.  Alice now produces zkSNARKs proving that she looked up each node correctly.
+Assume Alice has some full network view L created by a public consensus process.  We may assume this consensus process certifies the fairness of L.  We assume that L is public and updated infrequently.  If Alice samples L using her VRF, then her sample's fairness becomes verifiable.  We observe the update frequency for L interacts with Alice's cover traffic rate discussed below, but this seems acceptable if both use a common time period.
 
-We should worry that this slow start to the consensus creates problems for new nodes.  Also these zkSNARKs create painful complexity, but their performance looks okay since they only happen when winning the lottery.  
+We expect this network view L eventually becomes the scaling bottle neck for any anonymity systems, which bodes poorly for users naively generating cover traffic that results in payments.  Right now, Tor is already stretching their consensus by distributing the full list of 6000 nodes to 2 million users.  We might distribute more frequently since relays' keys rotate.
 
-Again, we should consider using Intel SGX and Arm TrustZone, as doing so matches the above commitment security model, but now we must process more data, which sounds problematic for these technologies.  All this could wait until we hit 10k nodes regardless. 
+We believe such an L could be distributed to relays by making our underlying blockchain-based payment scheme yield extensive network information.   We thus concede that only relay generated cover traffic winning the lottery sounds much easier than user generated cover traffic winning.
+
+We might investigate Jeff's index-based encryption for network PKI compression ideas, but these require new approaches to Byzantine fault tolerant protocols. 
+
+There is a larger research project around users securely using a partial network view L, likely obtained through gossip.  We discuss verifiably sampling such a partial network view, independently from the anonymity risks in obtaining and using one.  
+
+Imagine Alice commits to her network view L when she periodically reregisters her VRF key and that doing so produces a random seed r not controlled by Alice.  If she reregisters her VRF key often enough, then her network view still grows, but not as quickly.  Alice now produces a zero-knowledge proof that she looked up each node correctly using VRF(r ++ _).  These zero-knowledge proofs could likely be Boneh-Boyen short signatures that the node occupied the ith position in her list, although not leaking the list size matters too.  See: https://infoscience.epfl.ch/record/128718/files/CCS08.pdf
+
+We do not however know anything about the fairness of Alice's network view L itself, so this scheme does not achieve the desired assurances.  We consider mode solutions unsatisfactory:
+
+ - There are threshold identity-base mix networks solve this PKI problem, but only with catastrophic security sacrifices. 
+ - We might agree on partial network views L_i and distribute these packaged L_i, but now using some particular L_i leaks considerable information about Alice's network view, probably breaking any security assumptions for a gossip based scheme.  
+ - Alice might sample another node's network view using PIR, but computational PIR is painfully slow and information theoretic PIR creates numerous problems too.
+
+We also worry that Alice's commitment to her view of the network slows her network view growth rate, which creates problems for new nodes.  We might imagine some verifiable gossiping algorithm in which Alice proves she participated correctly, probably using a zkSNARK or zkSTARK.  We cannot do this now because our gossip algorithm will evolve in future and need not remain simple.  Also, zkSNARKs or zkSTARKs incur considerable complexity, although their performance looks okay since they only happen when winning the lottery.  Worse, we worry that Alice intentionally starts by talking only with corrupt nodes, so those nodes must produce proofs too, which likely means zkSNARKs arranged in a cycle of elliptic curves.  We only know such constructions with 80 bits of security right now.  Rerandomizable certificates like Coconut might play some role here: https://arxiv.org/pdf/1802.07344.pdf
+
+We might consider attesting to some gossip protocol's correctness using Intel SGX and Arm TrustZone too, which solves the design chick and egg problem.  There is however considerable engineering work required by such an approach because these technologies remain fairly limited, and doing a network protocol sounds outrageous.  iPhones lack any sufficiently powerful trusted computing scheme, so actually this approach only makes sense if we gossip nodes even among relays but only relay generated cover traffic wins the lottery.  In fact, all relays would use Intel SGX avoiding any second implementation for Arm TrustZone. 
+
+An alternative monetary scheme might mitigates malicious mining attacks by sacrificing fungibility:  Alice's winning packet credits each relay one coins denominated jointly by all relays along the packet's route, perhaps the relays even collectively sign without any blockchain.  All users prefer coins for relays they consider honest because auditors observe high interlinking.  If a relay is honest then we want it to happily exchange any two coins denominated by itself, although auditors may play some role here too.  Alice might engage in malicious mining but doing so need to yield coins with poor linkage outside her relays because other users and relays interact with her nodes less than she does.  Users might pay for relay services like storage or large packets using the relays own coins.  We consider alternative monetary scheme like this highly speculative.
+
+In summery, we see three potentially ultra-scalable moon-shot long-range plans:
+
+ - Index-based encryption for network PKI compression gives a full network view, or
+ - Design a verifiable gossip protocol using Intel SGX or cycles of elliptic curves.
+ - Alternative economic models with non-fungible coins
+
+We see realistic two short term solutions here:
+
+ - Capitalist:  We gossip node information but make Alice pay for her VRF keys and accept the free services attack or investigate punishments. 
+ - Tor style:  We construct a full certified consensus network view which we distribute to relays and initially users.  We might only have relays generate cover traffic win the lottery, so that future iterations could distribute less to users.
 
 ### Alice must evaluate her VRF sparingly
 
