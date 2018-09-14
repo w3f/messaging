@@ -102,14 +102,26 @@ We discuss several complications here and propose solutions.  These solutions ha
 
 We cannot ask that intermediate relays verify Alice's VRF key when forwarding packets because they have trouble verifying many properties, like say uniqueness.  Also, the VRF key lives in a pairing based curve, which hurts performance if evaluated everywhere.  
 
-Imagine first that relays generate the cover traffic from which we create payments.  A relay Alice could run multiple virtual relays to obtain more VRF keys.  All nodes generate cover traffic in Loopix.  We could however employ stake here if either (a) not all relays need to generate cover loops or (b) all nodes were stakes.  Alice could still run numerous minimally staked relays, so winning musst be tied to stake in this scenario.  We could evaluate if merely loosing of reward provides sufficient economic incentives when all relays generate cover traffic but not all relays are stakes.  If not, we'd need more complex solutions designed for users.  
+Imagine first that relays generate the cover traffic that wins the payment lottery.  A relay Alice could run multiple virtual relays to obtain more VRF keys.  We could however employ stake here if either (a) not all relays need to generate cover loops or (b) all nodes were staked.  We dislike all nodes being staked, but all nodes do generate cover traffic in Loopix.  In any case, Alice could still run numerous minimally staked relays, so winning musst be tied to stake in this scenario.  
 
-Imagine second that users generate cover traffic.  An honest guard could enforce that a user Alice commits to her VRF key, but what comes first the guard selection or the VRF key commitment?  Alice could run her own guard or connect to many guards, if either gave her more VRF keys.  There are practical issues with Alice's VRF selecting her guard, like guards being down, so the route selection solution might not work at guards anyways.  I'd expect this creates hiccups in using a stratified topology with restricted routes.  We might simply publish user's IP addresses when their cover traffic wins, but this likely creates privacy problems. 
+We might initially ask that nodes stake themselves according to their self assessment of their bandwidth and reliability, but this sounds unrealistic long-term.  We might design some scheme in which auditor nodes estimate relays bandwidth, reliability, and honesty, while nominator nodes provided stake for unstaked replays based on the auditors recommendations.  We consider this approach extremely complex so we do not attempt to answer questions like rewarding auditors.  We might discover that some auditor-like functionality sounds unavoidable though, in which case self assessment might be an acceptable initial starting place.  
+
+If we devise some punishment scheme, the we could evaluate if merely loosing of reward provides sufficient economic incentives when all relays generate cover traffic but without stake.  If so, then this provides one simple solution.  There are also intermediate schemes that simulate stake by making a relays' first few winning packets become its stake, but again assuming punishment.  
+
+We think some solutions described below for user generated cover traffic winning also works for relay generated cover traffic winning. 
+
+Imagine second that users generate cover traffic that wins the payment lottery.  An honest guard could enforce that a user Alice commits to her VRF key, but what comes first the guard selection or the VRF key commitment?  Alice could run her own guard or connect to many guards, if either gave her more VRF keys.  There are practical issues with Alice's VRF selecting her guard, like guards being down, so the route selection solution might not work at guards anyways.  I'd expect this creates hiccups in using a stratified topology with restricted routes.  We might simply publish user's IP addresses when their cover traffic wins, but this likely creates privacy problems. 
 
 We could certify Alice's VRF key from another node using a blind signed certificate, except naively that node could issue an unlimited number of blind certificates.  We could employ a threshold blind signed certificate though.  I dislike the complexity here but if Alice is expected to pay for services, then a threshold blind signed certificate provides a convenient avenue for that payment.  We could even produce a zero-knowledge proof that she burned money on chain and exploit an existing threshold blind signature by validators.  We might certify Alice's VRF key using other unique resources like a phone number, again incurring complexity from threshold blind signed certificates.  
 
-In fact, our easiest solution would likely be to certify VRF keys using the machine itself as a unique resource, via Intel SGX and Arm TrustZone.  These lack strong threat models but they suffice for preventing malicious mining.  If we run the VRF outside the trust boundary, then Alice could employ malware to mint VRF keys, but she could equally well create numerous phone number registrations with Android malware. 
+An interestingly straightforward solution would likely be to certify VRF keys using the machine itself as a unique resource, via Intel SGX and Arm TrustZone.  These lack strong threat models but they suffice for preventing malicious mining.  If we run the VRF outside the trust boundary, then Alice could employ malware to mint VRF keys, but she could equally well create numerous phone number registrations with Android malware.  iPhones have no usable trusted computing system, so maybe this works only for relays, or maybe iPhone users can pay real money.
 
+We foresee two realistic short-term solutions here:
+
+ - Commerce:  Alice pays for her VRF key so only user generated cover traffic wins.
+ - We certify relay VRF keys using Intel SGX so that only relay generated cover traffic wins.
+ ...
+ 
 ### Alice should sample the full network fairly
 
 Imagine first that Alice pays for registering her VRF key, but chooses network nodes however she likes.  If she controls relays in each layer, then she could sacrifice her anonymity to extract free services from relays owned by others.  We do not consider this an unpleasant but not necessarily catastrophic attack.  We might ensure Alice's nodes contribute network services, but this requires punishments.
@@ -148,7 +160,7 @@ In summery, we see three potentially ultra-scalable moon-shot long-range plans:
 
 We see realistic two short term solutions here:
 
- - Capitalist:  We gossip node information but make Alice pay for her VRF keys and accept the free services attack or investigate punishments. 
+ - Commerce:  We gossip node information but make Alice pay for her VRF keys and accept the free services attack or investigate punishments. 
  - Tor style:  We construct a full certified consensus network view which we distribute to relays and initially users.  We might only have relays generate cover traffic win the lottery, so that future iterations could distribute less to users.
 
 ### Alice must evaluate her VRF sparingly
