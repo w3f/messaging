@@ -104,7 +104,7 @@ We cannot ask that intermediate relays verify Alice's VRF key when forwarding pa
 
 Imagine first that relays generate the cover traffic that wins the payment lottery.  A relay Alice could run multiple virtual relays to obtain more VRF keys.  We could however employ stake here if either (a) not all relays need to generate cover loops or (b) all nodes were staked.  We dislike all nodes being staked, but all nodes do generate cover traffic in Loopix.  In any case, Alice could still run numerous minimally staked relays, so winning musst be tied to stake in this scenario.  
 
-We might initially ask that nodes stake themselves according to their self assessment of their bandwidth and reliability, but this sounds unrealistic long-term.  We might design some scheme in which auditor nodes estimate relays bandwidth, reliability, and honesty, while nominator nodes provided stake for unstaked replays based on the auditors recommendations.  We consider this approach extremely complex so we do not attempt to answer questions like rewarding auditors.  We might discover that some auditor-like functionality sounds unavoidable though, in which case self assessment might be an acceptable initial starting place.  
+We might initially ask that nodes stake themselves according to their self assessment of their bandwidth and reliability, but this sounds unrealistic long-term.  We might design some scheme in which auditor nodes estimate relays bandwidth, reliability, and honesty, while nominator nodes provided stake for unstaked replays based on the auditors recommendations.  We consider this approach extremely complex so we do not attempt to answer questions like rewarding auditors.  We might discover that some auditor-like functionality to be unavoidable though, in which case self assessment might be an acceptable initial starting place.  
 
 If we devise some punishment scheme, the we could evaluate if merely loosing of reward provides sufficient economic incentives when all relays generate cover traffic but without stake.  If so, then this provides one simple solution.  There are also intermediate schemes that simulate stake by making a relays' first few winning packets become its stake, but again assuming punishment.  
 
@@ -116,12 +116,14 @@ We could certify Alice's VRF key from another node using a blind signed certific
 
 An interestingly straightforward solution would likely be to certify VRF keys using the machine itself as a unique resource, via Intel SGX and Arm TrustZone.  These lack strong threat models but they suffice for preventing malicious mining.  If we run the VRF outside the trust boundary, then Alice could employ malware to mint VRF keys, but she could equally well create numerous phone number registrations with Android malware.  iPhones have no usable trusted computing system, so maybe this works only for relays, or maybe iPhone users can pay real money.
 
-We foresee two realistic short-term solutions here:
+We foresee two realistic straightforward short-term solutions here:
 
  - Commerce:  Alice pays for her VRF key so only user generated cover traffic wins.
- - We certify relay VRF keys using Intel SGX so that only relay generated cover traffic wins.
+ - We certify relay VRF keys using Intel SGX with only relay generated cover traffic winning.
  ...
- 
+
+We should investigate if proof-of-stake blockchain tools provide another better solution, like Ouroboros limiting block outputs or whatever.  If we solve network view below via something like Blockmania then some multi-teared winning notion might circularly validate VRF keys for both relays and users.
+
 ### Alice should sample the full network fairly
 
 Imagine first that Alice pays for registering her VRF key, but chooses network nodes however she likes.  If she controls relays in each layer, then she could sacrifice her anonymity to extract free services from relays owned by others.  We do not consider this an unpleasant but not necessarily catastrophic attack.  We might ensure Alice's nodes contribute network services, but this requires punishments.
