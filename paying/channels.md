@@ -83,15 +83,15 @@ We must prove knowledge of m instead of revealing it, but do so more efficiently
  - Reveal: m = b/a
  - Verify: e(A^m, X_2) = e(B, g_2)
 
-We should attempt to do the same without pairings:
+We should attempt to do the same without pairings but the following is insecure due to not using any hash function ala Schnorr:
 
  - Issuer key:  X := g^x
  - Propose:  A := g^a  B' := g^b  m = b/a
- - Sign:  B := B'^x  with DLEQ NIZK for x chosen correctly
- - Reblind: A := A^s  B := B^t  m := m t/s 
+ - Sign:  B := B'^x  with DLEQ NIZK for x chosen correctly. l=1
+ - Reblind: A := A^s  B := B^t  m := m t/s   l := l t
  - Header: A, B
- - Reveal: m = b/a  ??
- - Verify: A^m X^?? = B   NOT
+ - Reveal: m = b/a  l
+ - Verify: A^m X^l = B   NOT
  
 
 # Cover traffic
