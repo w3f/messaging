@@ -39,17 +39,60 @@ It's worth exploring the economic games here to try to avoid stake or thresholds
 
 We think payment channels between hops might require less crypto per hop than blind signatures, but they raise numerous anonymity issues which we discuss here.
 
-First, we must worry if payment channel activity leaks information about packet routes.  We discuss below a scheme that seemingly produces key material with the right cryptographic unlinkability, although this requires a proof.  We also need channels to pay for numerous packets over a long enough time frame, but that's likely an independent design goal.  We might worry about mix-style attacks like flooding, meaning payment channels may reduce anonymity properties to that of pool-like mixes, but very big ones.  I think all sounds okay but involves some future work or at least arguing with anonymity people.
+First, we must worry if payment channel activity leaks information about packet routes.  We discuss below a scheme that seemingly produces key material with the right cryptographic unlinkability, although this requires a proof.  We also need channels to pay for numerous packets over a long enough time frame, but that's likely an independent design goal.  I think all sounds okay but involves some future work or at least arguing with anonymity people.
 
-Second, we should ideally avoid linking on-chain identity with IP address, even at the guard node.  Some solutions include:  We could solve this by using blind signed tokens at the guard nodes, but this entails all the code complexity of both schemes.  As a rule ZCash style payments involve prohibitive computation, but guards should be long lived.  We should research the efficiency and code complexity of anonymous payment channels like BOLT vs normal payment channels, but the zero knowledge proofs involved may kill this.  Also BOLT requires a strongly anonymous ZCash style currency underneath for full protection.  We could employ monetary tokens that represents something essentially valueless, like a future statistical payment, and award them to users without users paying anything, but see notes in the probabilistic payments document (TODO: which part?).  All three solutions sound hard, but not harder than making blind signatures work, and BOLT exists as a quasi-off the shelf solution eventually.
+We might even worry about mix-style attacks like flooding, meaning payment channels may reduce anonymity properties to that of pool-like mixes.  At the extreme, an adversary could send through enough packets to clog all payment channels except specific desirable ones, so that packets get dropped unless they follow the adversary's preferred routes.  We might defend against this attach by having sufficient funds in each payment channel, but if there are n nodes in k strata then there are n^2/k payment channels, and an adversary must target at most k n, so the attack's cost decreases super-linearly as the network grows.  We could improve available funds with some restricted routes scheme, but this reduces the attack cot proportionally too.
 
-Third, we cannot reveal information about packet drops beyond one hop, including via the payment channel.  We discuss this more carefully below ultimately payment channels should burn any rewards not transfered onwards.  We should ensure this does not create griefing attacks via user non-payment however, but that's likely okay if we do not retrofit anything too dangerously probabilistic.
+Second, we should ideally avoid linking on-chain identity with IP address, even at the guard node.  Some solutions include:  We could solve this by using blind signed tokens at the guard nodes, but this entails all the code complexity of both schemes.  As a rule ZCash style payments involve prohibitive computation, but guards should be long lived.  We should research the efficiency and code complexity of anonymous payment channels like BOLT vs normal payment channels, but the zero knowledge proofs involved may kill this.  Also BOLT requires a strongly anonymous ZCash style currency underneath for full protection.  We could employ monetary tokens that represents something essentially valueless, like a future statistical payment, and award them to users without users paying anything, but see notes in the probabilistic payments document (TODO: which part?).  All three solutions sound hard, but not harder than making blind signatures work, and BOLT might exist as a quasi-off the shelf solution eventually.
 
-Fourth, we expect all payments should know how much further they traverse through the network.  This is fine for normal traffic in a stratified mix net, but not for all cover traffic in Loopix.  A priori, this appears problematic for free route networks too, which sound easier to build, even if we prefer stratified eventually.  We might address both problems with some clever scheme for paying out packets reward tokens instead of actual "money" and having nodes convert that the "money" later.
+Third, we cannot reveal information about packet drops beyond one hop, including via the payment channel.  We discuss this more carefully below ultimately payment channels should burn any rewards not transfered onwards.  We should ensure this does not create griefing attacks via user non-payment however, but that's likely okay if we do not retrofit anything too dangerously probabilistic.  There is thus an incentive to be in earlier strata so that fewer payments get dropped by users choosing bad nodes.
 
-## Alternatives
+Fourth, we expect all payments should know how much further they traverse through the network.  This is fine for normal traffic in a stratified mix net, but not for all cover traffic in Loopix.  A priori, this appears problematic for free route networks too, which sound easier to build, even if we prefer stratified eventually.  We might address both problems with some clever scheme for over paying or paying out packets reward tokens instead of actual "money" and having nodes convert that the "money" later.
 
-We might use a zero-knowledge proof instead of blind signature, but Alice requires considerable time making one for every hop, and the hops require some time to verify.  There are faster zero-knowledge schemes like zkSTARKs that require too much space, but maybe some witness-indistinguishably trickery gives interesting compromises.
+Issues:
+
+ - Asymptotic attacks exploiting channels as pool mixes.
+ - Requires anonymous payment scheme like ZCash.
+ - We must burn payments when packets get dropped, which creates incentives ot be in early strata.
+ - Relays loose cover traffic loops of Loopix if we do not invent some parallel token denomination.
+
+## Coconut
+
+We might use a zero-knowledge proof instead of blind signature, but Alice requires considerable time making one for every hop, and the hops require some time to verify.  There are faster zero-knowledge schemes like zkSTARKs that require too much space, but maybe some simple DLEQ proof or some witness-indistinguishably trickery gives interesting compromises.  
+
+Alice could for example use rerandomizable certificates like Coconut, which each hop reblinds.  At worst, Alice could provide a new DLEQ proof of her certificates' correctness, which costs only a couple curve points.  See: https://arxiv.org/pdf/1802.07344.pdf
+
+We observe that Coconut's two redemption blinding points cannot themselves be reblinded, so this scheme works but costs 2 points plus 2 points per hop, some on the fat curve.  We could select some faster BN curve to improve performance, but doing so may harm anonymity, especially if we use the tokens as packet public keys.
+
+In any case, we need a NIZK proof to 
+ DLEQ proofs could themselves be reblinded then this scheme would incurs only O(1) complexity, except all four curve points from the signature could be reblinded by anyone, so any credential can be respent by anyone else.  
+
+We can likely realize this with an simpler token scheme, probably still based on ElGammal and maybe pairings.  We might simplify the redemption NIZK but it must still prove ownership.  We also want the redemption NIZK to prevent transferring by permitting the owner to reclaim some associated funds.  We consider the basic Short Randomizable Signatures by Pointcheval and Sanders.  See age 9 of https://eprint.iacr.org/2015/525.pdf
+
+ - Issuer keys:  X_i = g_i^x,  Y_i = g_i^Y
+ - Signature:  a = g_1^u,  b = a^{x+my}  obtained blinding using DLEQ NIZK
+ - Verification:  e(a, X_1 Y_1^m) = e(b, g_2)
+
+We must prove knowledge of m instead of revealing it, but do so more efficiently.  We should investigate mutating (a,b) by two distinct scalars, maybe something like this scheme with two points plus one scalar per hop:
+
+ - Issuer key:  X_2 := g_2^x
+ - Propose:  A := g_1^a  B' := g_1^b  m = b/a
+ - Sign:  B := B'^x
+ - Reblind: A := A^s  B := B^t  m := m t/s 
+ - Header: A, B
+ - Reveal: m = b/a
+ - Verify: e(A^m, X_2) = e(B, g_2)
+
+We should attempt to do the same without pairings:
+
+ - Issuer key:  X := g^x
+ - Propose:  A := g^a  B' := g^b  m = b/a
+ - Sign:  B := B'^x  with DLEQ NIZK for x chosen correctly
+ - Reblind: A := A^s  B := B^t  m := m t/s 
+ - Header: A, B
+ - Reveal: m = b/a  ??
+ - Verify: A^m X^?? = B   NOT
+ 
 
 # Cover traffic
 
