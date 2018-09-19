@@ -71,37 +71,6 @@ We also have a trivial prove predicate phi', but now we have equations on both c
 We want realize essentially the same protocol with phi and phi' trivial, but with minimal per hop data and computation, so just exploring ways to massage the scheme sounds wise.  We could check if the multi-attribute variant hides non-revealed attributes securely enough.  If so, an attribute per hop avoids hiding m and thus avoids the NIZKs entirely.  We'd worry about users reusing tokens under this scheme however.  We could select some faster BN curve to improve performance, but doing so may harm anonymity, especially if we use the tokens as packet public keys.
 
 
-BROKEN:
-
-We could maybe realize this with an simpler token scheme, probably still based on ElGammal and maybe pairings.  We might simplify the redemption NIZK but it must still prove ownership.  We also want the redemption NIZK to prevent transferring by permitting the owner to reclaim some associated funds.  
-
- - Issuer keys:  X_i = g_i^x,  Y_i = g_i^Y
- - Signature:  a = g_1^u,  b = a^{x+my}  obtained blinding using DLEQ NIZK
- - Verification:  e(a, X_1 Y_1^m) = e(b, g_2)
-
-We must prove knowledge of m instead of revealing it, but do so more efficiently.  We should investigate mutating (a,b) by two distinct scalars, maybe something like this scheme with two points plus one scalar per hop:
-
- - Issuer key:  X_2 := g_2^x
- - Propose:  A := g_1^a  B' := g_1^b  m = b/a
- - Sign:  B := B'^x
- - Reblind: A := A^s  B := B^t  m := m t/s 
- - Header: A, B
- - Reveal: m = b/a
- - Verify: e(A^m, X_2) = e(B, g_2)
-
-This is insecure for the signer because the BLS connection requires they hash to the curve somewhere.
-
-We should attempt to do the same without pairings by understanding the weaknesses of blind Schnorr signatures and trying to construct a rerandomizable token scheme.  We expect the hash function makes this impossible however.  In particular, the following is insecure due to not using any hash function ala Schnorr:
-
- - Issuer key:  X := g^x
- - Propose:  A := g^a  B' := g^b  m = b/a
- - Sign:  B := B'^x  with DLEQ NIZK for x chosen correctly. l=1
- - Reblind: A := A^s  B := B^t  m := m t/s   l := l t
- - Header: A, B
- - Reveal: m = b/a  l
- - Verify: A^m X^l = B   NOT
-
-
 # Cover traffic
 
 There is an advantage to not sending any cover traffic if you need to pay for cover traffic.  There is high level work that does not distinguish much between cover traffic and simply having more real traffic, but actual designs like Loopix require cover traffic.
