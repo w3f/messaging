@@ -62,12 +62,18 @@ We might use a zero-knowledge proof instead of blind signature, but Alice requir
 
 Alice could for example use rerandomizable certificates like Coconut, which each hop reblinds.  At worst, Alice could provide a new DLEQ proof of her certificates' correctness, which costs only a couple curve points.  See: https://arxiv.org/pdf/1802.07344.pdf
 
-We observe that Coconut's two redemption blinding points cannot themselves be reblinded, so this scheme works but costs 2 points plus 2 points per hop, some on the fat curve.  We could select some faster BN curve to improve performance, but doing so may harm anonymity, especially if we use the tokens as packet public keys.
+We observe that Coconut's redemption blinding point kappa cannot itself be reblinded, although nu can be, so this scheme works but costs 3 thin points (48 bytes) plus 1 fat point (96 bytes), plus one NIZK per hop, along with one NIZK to withdraw.  
 
-In any case, we need a NIZK proof to 
- DLEQ proofs could themselves be reblinded then this scheme would incurs only O(1) complexity, except all four curve points from the signature could be reblinded by anyone, so any credential can be respent by anyone else.  
+We have a trivial withdrawal predicate phi, so our withdrawal NIZK is a simple DLEQ proof on the thin curve, as its equations live entirely on the thin curve.  In principle implementing this NIZK should not be too much more complex than implementing say Schnorr signatures, but we might need to dig multi-scalar exponentiations out form some zero knowledge library.  All this was previously known from the underlying Short Randomizable Signatures scheme by Pointcheval and Sanders, see page 9 of https://eprint.iacr.org/2015/525.pdf  
 
-We can likely realize this with an simpler token scheme, probably still based on ElGammal and maybe pairings.  We might simplify the redemption NIZK but it must still prove ownership.  We also want the redemption NIZK to prevent transferring by permitting the owner to reclaim some associated funds.  We consider the basic Short Randomizable Signatures by Pointcheval and Sanders.  See age 9 of https://eprint.iacr.org/2015/525.pdf
+We also have a trivial prove predicate phi', but now we have equations on both curves, so afaik a vanilla DLEQ proof does not suffice.  It's presumably still a fairly straightforward Fiat-Shamir transformation to produce a pairing-based verification that works, but now each hop requires sending two fat points, a couple scalars, doing multi-scalar exponentiations on both curves, and a pairing.
+
+We want realize essentially the same protocol with phi and phi' trivial, but with minimal per hop data and computation, so just exploring ways to massage the scheme sounds wise.  We could check if the multi-attribute variant hides non-revealed attributes securely enough.  If so, an attribute per hop avoids hiding m and thus avoids the NIZKs entirely.  We'd worry about users reusing tokens under this scheme however.  We could select some faster BN curve to improve performance, but doing so may harm anonymity, especially if we use the tokens as packet public keys.
+
+
+BROKEN:
+
+We could maybe realize this with an simpler token scheme, probably still based on ElGammal and maybe pairings.  We might simplify the redemption NIZK but it must still prove ownership.  We also want the redemption NIZK to prevent transferring by permitting the owner to reclaim some associated funds.  
 
  - Issuer keys:  X_i = g_i^x,  Y_i = g_i^Y
  - Signature:  a = g_1^u,  b = a^{x+my}  obtained blinding using DLEQ NIZK
@@ -83,7 +89,9 @@ We must prove knowledge of m instead of revealing it, but do so more efficiently
  - Reveal: m = b/a
  - Verify: e(A^m, X_2) = e(B, g_2)
 
-We should attempt to do the same without pairings but the following is insecure due to not using any hash function ala Schnorr:
+This is insecure for the signer because the BLS connection requires they hash to the curve somewhere.
+
+We should attempt to do the same without pairings by understanding the weaknesses of blind Schnorr signatures and trying to construct a rerandomizable token scheme.  We expect the hash function makes this impossible however.  In particular, the following is insecure due to not using any hash function ala Schnorr:
 
  - Issuer key:  X := g^x
  - Propose:  A := g^a  B' := g^b  m = b/a
@@ -92,7 +100,7 @@ We should attempt to do the same without pairings but the following is insecure 
  - Header: A, B
  - Reveal: m = b/a  l
  - Verify: A^m X^l = B   NOT
- 
+
 
 # Cover traffic
 
