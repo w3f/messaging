@@ -35,6 +35,10 @@ We must still limit the issuer nodes by requiring they win some game.  We might 
 
 It's worth exploring the economic games here to try to avoid stake or thresholds. 
 
+### Double spending
+
+If we use blind signatures then spending operation reveals the blind signed message, so honest users only spend each token once.  If we want each token to only be spendable once then we must however do double spending protection, which requires collecting the messages into a database, like a semi-central authority or a ultra-simple blockchain.  This sucks.
+
 ## Payment channels
 
 We think payment channels between hops might require less crypto per hop than blind signatures, but they raise numerous anonymity issues which we discuss here.
@@ -66,9 +70,15 @@ We observe that Coconut's redemption blinding point kappa cannot itself be rebli
 
 We have a trivial withdrawal predicate phi, so our withdrawal NIZK is a simple DLEQ proof on the thin curve, as its equations live entirely on the thin curve.  In principle implementing this NIZK should not be too much more complex than implementing say Schnorr signatures, but we might need to dig multi-scalar exponentiations out form some zero knowledge library.  All this was previously known from the underlying Short Randomizable Signatures scheme by Pointcheval and Sanders, see page 9 of https://eprint.iacr.org/2015/525.pdf  
 
-We also have a trivial prove predicate phi', but now we have equations on both curves, so afaik a vanilla DLEQ proof does not suffice.  It's presumably still a fairly straightforward Fiat-Shamir transformation to produce a pairing-based verification that works, but now each hop requires sending two fat points, a couple scalars, doing multi-scalar exponentiations on both curves, and a pairing.
+We also have a trivial prove predicate phi', but now we have equations on both curves, so afaik a vanilla DLEQ proof does not suffice.  It's presumably still a fairly straightforward Fiat-Shamir transformation to produce a pairing-based verification that works, but now each hop requires sending two fat points, a couple scalars, doing multi-scalar exponentiations on both curves, and a pairing.  We can likely batch at least the pairing though.
 
 We want realize essentially the same protocol with phi and phi' trivial, but with minimal per hop data and computation, so just exploring ways to massage the scheme sounds wise.  We could check if the multi-attribute variant hides non-revealed attributes securely enough.  If so, an attribute per hop avoids hiding m and thus avoids the NIZKs entirely.  We'd worry about users reusing tokens under this scheme however.  We could select some faster BN curve to improve performance, but doing so may harm anonymity, especially if we use the tokens as packet public keys.
+
+### Users must stake tokens
+
+If we use reblindable certificates like coconut then each token is spendable an unlimited number of times.  We can make the users rebuy the tokens periodically, but this does not tell us much about what nodes routes the most traffic.  We must also prevent users from gifting tokens to multiple friends.  If we assume all users want privacy, not an ideal assumption, then we should make reblinding the token require a secret that permits stealing the user's money.  I think coconut can give this.  I said coconut seems too slow, but you could likely batch this DLEQ verification across the pairing, but I'd need to work out how it works first.  I think the only irreparably sucky part is users needing to stake their tokens, which sounds more expensive than buying tokens.
+
+I suspect blind Schnorr might suffer from only a minor forgery threat, not any attacks on blinding.  It's three move, but this might make it viable for something, especially if it could be turned into a certificate scheme.  This is an interesting problem, even if it may not solve our problems.
 
 
 # Cover traffic
