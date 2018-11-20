@@ -97,6 +97,7 @@ We face a hurdle that cover traffic senders could bias their cover traffic towar
 At first blush, there is a relatively straightforward sounding scheme for route selection, given some strong assumptions on timing and network view:  We consider some node Alice that generates cover traffic eligible to win the lottery.  Alice has a VRF key v to which she is committed.  Alice seeds her VRF with some representative for the current time to produce a verifiable CSPRNG, probably by using the output to seed ChaCha20.  Alice uses this CSPRNG to sample her route from the network view.  
 
 We discuss several complications here and propose solutions.  These solutions have notable code complexity overhead, but they only arise when Alice's cover packet wins the payment lottery, giving them acceptable performance even for slow solutions.  We suggest initially addressing these concerns with three dirty Intel SGX and Arm TrustZone hacks, and requiring that users clocks not be too skewed, but even this could wait until the network sees significant adoption.
+TODO: NOT ANY MORE
 
 ### Alice should be uniquely committed to her VRF key 
 
