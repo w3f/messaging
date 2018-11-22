@@ -21,25 +21,35 @@ is a new protocol to handle transient messaging at scale. We believe this is a
 necessary cornerstone for enabling the mainstream adoption of DApps.
 
 ## Project
+
 We would like to gather a number of projects together to align and support this protocol:
 - Researchers
    - Academia
-- Web 3 projects
-   - Protocol implementers
-- Core dev teams from Web 3 space
+   - Web 3 projects
+- Protocol implementers
+   - Core dev teams from Web 3 space
 - Application builders
   - User messaging application
   - State channels
   - Streaming protocols
   - Other applications requiring transient messaging
+  
+**The goal is to end up with at least one viable implementation, spec and a theoretical
+analysis of the protocol properties.**
 
 The idea is to start with gathering requirements and aligning on goals, the Web3
 Foundation (W3F) has discussed with a number of projects to better understand
 what the needs are. W3F has also started to do an initial exploration of
 potential components to be used in the protocol.
 
-After the initial round of asynchronous information gathering W3F aims to
-organise a workshop for all potential initial contributors.
+## Plan (to be evolved)
+
+1. Refine this document to reflect the motivation and the direction for the
+project until initial contributors are happy with it.
+2. W3F to organise a workshop with all the relevant parties
+3. Come up with clear work packages to be done by all contributors.
+4. Readjust the plan together with the project contributors.
+5. Achieve the goal.
 
 ### Project contributors
 - Web3 Foundation
