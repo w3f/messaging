@@ -42,7 +42,7 @@ Foundation (W3F) has discussed with a number of projects to better understand
 what the needs are. W3F has also started to do an initial exploration of
 potential components to be used in the protocol.
 
-## Plan (to be evolved)
+### Plan (to be evolved)
 
 1. Refine this document to reflect the motivation and the direction for the
 project until initial contributors are happy with it.
