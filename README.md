@@ -59,7 +59,9 @@ leave it out.
 Metadata that we want to protect are:
 
 **1. Sender Anonymity** (who sent a message?)
+
 **2. Receiver Anonymity** (who read a message?)
+
 **3. Sender-Receiver Unlinkability** (who is talking to whom?)
 
 Primary consideration in threat model is:
@@ -84,8 +86,9 @@ increased number of users in the system increases the anonymity set.
 This design consideration, in addition to general user adoption concerns, has
 two implications:
 
-**4. Reasonable Latency** (<5s, to allow for IM [XXX]) **5. Reasonable
-Bandwidth** (not specified, mobile data plan in undeveloped countries)
+**4. Reasonable Latency** (<5s, to allow for IM [XXX])
+
+**5. Reasonable Bandwidth** (not specified, mobile data plan in undeveloped countries)
 
 Since The User of the protocol could equally be someone with a limited data plan
 as someone publishing sensitive information under a nom de plume, it is
@@ -213,7 +216,9 @@ anonymity community with seemingly unforeseeable consequences. We nevertheless
 think rewards represents our best hope for a network large enough to challenge
 today’s centralized providers that operate on surveillance capitalism. We do not
 imagine rewards obliviate the need to steward relay operator culture, possibly
-quite the opposite. Messaging types
+quite the opposite.
+
+### Messaging types
 We’re focusing on one-to-one messaging for now.  We actually do require messaging layer crypto, even after all the mix net layers, so expect an Axolotl-like ratchet for this.  
 
 We can adapt our short-term message storage plans for small group messaging, but
@@ -221,13 +226,17 @@ not with exactly the same privacy assurances. We leave designing this to future
 work.
 
 We think one-to-mass messaging should be done by using the mix network to send
-to a broadcast protocol like Whisper v1 or perhaps a blockchain. Payment We’re
-designing an accounting scheme to prevent abuse and reward nodes, without
+to a broadcast protocol like Whisper v1 or perhaps a blockchain.
+
+### Payment
+We’re designing an accounting scheme to prevent abuse and reward nodes, without
 damaging users’ anonymity. We’re currently working on several designs based on
 fundamentally different methodologies, primarily payment channels, blind
 signatures, and secret shopper, so as to more fairly evaluate them. We’re
 keeping these designs as agnostic as possible to questions like if the users
-actually pay anything ever. Implementation In order to leverage existing work
-done in the space we would like to leverage libp2p for networking and make sure
-that at least one implementation is fully runnable in the browser leveraging
-Javascript and Wasm.
+actually pay anything ever.
+
+### Implementation
+In order to leverage existing work done in the space we would like to leverage
+libp2p for networking and make sure that at least one implementation is fully
+runnable in the browser leveraging Javascript and Wasm.
