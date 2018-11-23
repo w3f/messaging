@@ -250,3 +250,7 @@ actually pay anything ever.
 In order to leverage existing work done in the space we would like to leverage
 libp2p for networking and make sure that at least one implementation is fully
 runnable in the browser leveraging Javascript and Wasm.
+
+## Copyright
+
+Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
