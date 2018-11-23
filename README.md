@@ -44,8 +44,8 @@ potential components to be used in the protocol.
 
 ### Plan (to be evolved)
 
-1. Refine this document to reflect the motivation and the direction for the
-project until initial contributors are happy with it.
+1. Refine this document to reflect the motivation, requirements for the
+project and initial mapping of the space until initial contributors are happy with it.
 2. W3F to organise a workshop with all the relevant parties
 3. Come up with clear work packages to be done by all contributors.
 4. Readjust the plan together with the project contributors.
@@ -55,6 +55,8 @@ project until initial contributors are happy with it.
 - Web3 Foundation
 - Status
 - Validity Labs
+
+To contribute your project will need to commit some time to help specifying the motivation, requirements and mapping of the solution space. Following that contributors will be invited to participate in a joint workshop.
 
 ## Protocol requirements
 
