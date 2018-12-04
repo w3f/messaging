@@ -1,6 +1,6 @@
-# Anonymous Communication Protocol
+# A Decentralised Privacy-Preserving Communication Protocol
 
-Messaging for Web3.
+> Messaging for Web3.
 
 ## Motivation
 In the current decentralised application landscape, we are seeing projects
@@ -11,7 +11,7 @@ exchange of transient messages; however, it does not make sense to transmit
 these messages via a blockchain. Gavin Wood realised this problem in the early
 days of Ethereum, and suggested that DApps would require a decentralised
 messaging protocol that would provide this capability. This protocol is called
-Whisper.
+[Whisper](https://github.com/ethereum/wiki/wiki/Whisper).
 
 Unfortunately, the evolution and adoption of Whisper has been stunted, which is
 despite the rapid advancement of applications. The lack of development means
@@ -31,7 +31,7 @@ We would like to gather a number of projects together to align and support this 
 - Application builders
   - User messaging application
   - State channels
-  - Streaming protocols
+  - Latency-agnostic streaming protocols
   - Other applications requiring transient messaging
   
 **The goal is to end up with at least one viable implementation, spec and a theoretical
@@ -51,10 +51,11 @@ project and initial mapping of the space until initial contributors are happy wi
 4. Readjust the plan together with the project contributors.
 5. Achieve the goal.
 
-### Project contributors
-- Web3 Foundation
-- Status
-- Validity Labs
+### Project contributors (in alphabetical order)
+- [Status](https://status.im)
+- [Validity Labs](https://validitylabs.org)
+- [Web3 Foundation](https://web3.foundation)
+
 
 To contribute your project will need to commit some time to help specifying the motivation, requirements and mapping of the solution space. Following that contributors will be invited to participate in a joint workshop.
 
