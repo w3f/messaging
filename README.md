@@ -1,6 +1,6 @@
-# Anonymous Communication Protocol
+# A Decentralised Privacy-Preserving Communication Protocol
 
-Messaging for Web3.
+> Messaging for Web3.
 
 ## Motivation
 In the current decentralised application landscape, we are seeing projects
@@ -11,7 +11,7 @@ exchange of transient messages; however, it does not make sense to transmit
 these messages via a blockchain. Gavin Wood realised this problem in the early
 days of Ethereum, and suggested that DApps would require a decentralised
 messaging protocol that would provide this capability. This protocol is called
-Whisper.
+[Whisper](https://github.com/ethereum/wiki/wiki/Whisper).
 
 Unfortunately, the evolution and adoption of Whisper has been stunted, which is
 despite the rapid advancement of applications. The lack of development means
@@ -31,7 +31,7 @@ We would like to gather a number of projects together to align and support this 
 - Application builders
   - User messaging application
   - State channels
-  - Streaming protocols
+  - Latency-agnostic streaming protocols
   - Other applications requiring transient messaging
   
 **The goal is to end up with at least one viable implementation, spec and a theoretical
@@ -44,29 +44,37 @@ potential components to be used in the protocol.
 
 ### Plan (to be evolved)
 
-1. Refine this document to reflect the motivation and the direction for the
-project until initial contributors are happy with it.
+1. Refine this document to reflect the motivation, requirements for the
+project and initial mapping of the space until initial contributors are happy with it.
 2. W3F to organise a workshop with all the relevant parties
 3. Come up with clear work packages to be done by all contributors.
 4. Readjust the plan together with the project contributors.
 5. Achieve the goal.
 
-### Project contributors
-- Web3 Foundation
-- Status
-- Validity Labs
+### Project contributors (in alphabetical order)
+- [Status](https://status.im)
+- [Validity Labs](https://validitylabs.org)
+- [Web3 Foundation](https://web3.foundation)
+
+
+To contribute your project will need to commit some time to help specifying the motivation, requirements and mapping of the solution space. Following that contributors will be invited to participate in a joint workshop.
+
+## Role of the protocol
+
+| Layer | Purpose | Examples |
+| ----- | ------- | -------- |
+| Application | Application logic | Chat app |
+| -> **Protocol** <- | Scalable, decentralised metadata protection | |
+| P2P | Overlay routing, NAT traversal | [libp2p](https://libp2p.io), [WebRTC](https://webrtc.org) |
+| Network | Underlay routing | [TCP / IP](https://en.wikipedia.org/wiki/Internet_protocol_suite) |
+
+## Adversary model
+For the adversary model, see [a detailed description](./ADVERSARY.md)
 
 ## Protocol requirements
+For a more detailed description, see [a detailed description](./REQUIREMENTS.md) of the below listed requirements.
 
-The purpose of an anonymous communication (AC) protocol is to ensure metadata
-isn't leaked when messages are communicated between peers. It deals with how
-messages are transported, and not what is in them.
-
-An overarching principle is to keep things as simple as possible, and try to
-factor out subproblems to separate layers as much as possible. When in doubt,
-leave it out.
-
-Metadata that we want to protect are:
+Metadata protection:
 
 **1. Sender Anonymity** (who sent a message?)
 
@@ -74,75 +82,29 @@ Metadata that we want to protect are:
 
 **3. Sender-Receiver Unlinkability** (who is talking to whom?)
 
-Primary consideration in threat model is:
-
-- Global Passive Adversary resistant (GPA, insight into whole network)
-
-Some consideration should also be given to a global active attacker (GAA), in
-additional to local/remote attacks. For example, it might be reasonable to
-detect GAA, but not be fully GAA resistant. A more complete threat model with
-respect to capabilities should be provided, see Briar for example.
-
-Participation Anonymity is less important. This is most likely to be a factor in
-terms of Censorship Resistance (deep packet inspection, traffic morphing), which
-is important but currently not of primary concern for this specific protocol.
-This may change depending on protocol layering.
-
-The Anonymity Trilemma [XXX] states that there's a fundamental trade-off between
-Strong Anonymity on one hand and Low Latency / Low Bandwidth Overhead on the
-other. Additionally there's a forth dimension, User Distribution, whereby an
-increased number of users in the system increases the anonymity set.
-
-This design consideration, in addition to general user adoption concerns, has
-two implications:
+Convenience, Usability:
 
 **4. Reasonable Latency** (<5s, to allow for IM [XXX])
 
 **5. Reasonable Bandwidth** (not specified, mobile data plan in undeveloped countries)
 
-Since The User of the protocol could equally be someone with a limited data plan
-as someone publishing sensitive information under a nom de plume, it is
-desirable that the protocol accommodates the following property:
-
 **6. Adaptable Anonymity** (adjustable resource consumption)
 
-One could imagine a message being sent/received based on three parameters:
-chosen anonymity set, latency and bandwidth. The feasability of this approach is
-untested, and may differ for sender, receiver, and unlinkability. As an example,
-PSS provides a form of sliding Receiver Anonymity scale using partial
-addressing.
-
-This might be a misguided notion,
-see
-[Signal's design philosophy, point 1 and 3](https://github.com/signalapp/Signal-Android/blob/master/CONTRIBUTING.md#development-ideology).
-
-Additionally, the protocol should be:
+Decentralization:
 
 **7. Scalable** (up to, say, ~1M active nodes)
 
-Resource consumption should grow gracefully with the number of users. I.e. the
-guarantees around latency, bandwidth etc should be provided even up to ~1M
-nodes. Counterexamples: naive DC-nets and Whisper, which both exhibit quadratic
-scaling behavior. Another counter example are mixnetworks with latency on the
-order of minutes as you get up to to a sizable network size.
-
-There may be more specific throughput requirements, but this underspecified for
-now.
-
-Finally, this should be a peer-to-peer decentralized protocol:
-
 **8. No Specialized Services** (pure p2p)
 
-Any node should be able to do any job in the system. A specific node may choose
-to only operate with a subset of capabilities (say, for resource consumption
-reasons), but this is up to that node. Example: light node operation, taking
-advantage of Desktop/server different performance profile compared to mobile
-(intermittent connectivity, bandwidth).
+Incentives to achieve mass adoption:
 
-## Things that are explicitly out of scope
+**9. Incentivation for relayers** (not necessarily economical)
+
+
+### Things that are explicitly out of scope
 - Trust Establishment - provenance of long term keys to some known identity
 - Conversational Security - authentication, confidentiality, integrity, perfect
-  forward secrecy.
+  forward secrecy, accountability.
 
 Additionally, see below for other things that may be out of scope at this layer.
 
@@ -250,3 +212,7 @@ actually pay anything ever.
 In order to leverage existing work done in the space we would like to leverage
 libp2p for networking and make sure that at least one implementation is fully
 runnable in the browser leveraging Javascript and Wasm.
+
+## Copyright
+
+Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
