@@ -59,7 +59,7 @@ project and initial mapping of the space until initial contributors are happy wi
 
 To contribute your project will need to commit some time to help specifying the motivation, requirements and mapping of the solution space. Following that contributors will be invited to participate in a joint workshop.
 
-### Role of the protocol
+## Role of the protocol
 
 | Layer | Purpose | Examples |
 | ----- | ------- | -------- |
@@ -68,10 +68,10 @@ To contribute your project will need to commit some time to help specifying the 
 | P2P | Overlay routing, NAT traversal | [libp2p](https://libp2p.io), [WebRTC](https://webrtc.org) |
 | Network | Underlay routing | [TCP / IP](https://en.wikipedia.org/wiki/Internet_protocol_suite) |
 
-### Adversary model
+## Adversary model
 For the adversary model, see [a detailed description](./ADVERSARY.md)
 
-### Protocol requirements
+## Protocol requirements
 For a more detailed description, see [a detailed description](./REQUIREMENTS.md) of the below listed requirements.
 
 Metadata protection:
