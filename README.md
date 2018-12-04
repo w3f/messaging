@@ -71,11 +71,11 @@ To contribute your project will need to commit some time to help specifying the 
 ### Adversary model
 For the adversary model, see [a detailed description](./ADVERSARY.md)
 
-
 ### Protocol requirements
 For a more detailed description, see [a detailed description](./REQUIREMENTS.md) of the below listed requirements.
 
 Metadata protection:
+
 **1. Sender Anonymity** (who sent a message?)
 
 **2. Receiver Anonymity** (who read a message?)
@@ -83,6 +83,7 @@ Metadata protection:
 **3. Sender-Receiver Unlinkability** (who is talking to whom?)
 
 Convenience, Usability:
+
 **4. Reasonable Latency** (<5s, to allow for IM [XXX])
 
 **5. Reasonable Bandwidth** (not specified, mobile data plan in undeveloped countries)
@@ -90,11 +91,13 @@ Convenience, Usability:
 **6. Adaptable Anonymity** (adjustable resource consumption)
 
 Decentralization:
+
 **7. Scalable** (up to, say, ~1M active nodes)
 
 **8. No Specialized Services** (pure p2p)
 
 Incentives to achieve mass adoption:
+
 **9. Incentivation for relayers** (not necessarily economical)
 
 
