@@ -3,6 +3,28 @@
 > Messaging for Web3.
 
 ## Motivation
+
+We need communications protocols that protect metadata, partially as an ethical end goal and partially for business reasons, but also as a fundamental building block of decentralised applications.  
+
+We cannot control all information asymmetries, especially the metadata observed by large infrastructure providers.  Yet, information asymmetry or symmetry are an extremely important assumption in economics models.  We thus consider increasing our control over information asymmetry to be a essential building block, which makes privacy a crucial tool, including metadata protection. 
+
+We have witnessed adoption of centralised messaging solutions being influenced by users' perceptions of privacy, at least at a personal level.  We thus believe providing real metadata protections should help establish a stable user base, which may help solidify or stabilise other services provided by the protocol, including associated financial services.
+
+We also consider privacy to be a fundamental human right.  Article 12 of the Universal Declaration of Human Rights names "privacy" and "correspondence" for protection, which logically covers metadata.  
+
+
+
+
+No one shall be subjected to arbitrary interference with his privacy, family, home or correspondence, nor to attacks upon his honour and reputation. Everyone has the right to the protection of the law against such interference or attacks.
+
+
+also believe that users , and stronger privacy protections aid adoption. 
+
+If we lack metadata protections, then infrastructure providers will act as adversaries who collect and abuse user data in a myriad of ways, such as by adjusting prices, employing strategic voting, front running, .  
+
+
+
+
 In the current decentralised application landscape, we are seeing projects
 struggle to achieve mainstream adoption. We believe that the underlying
 protocols do not have sufficient capability to enable the necessary level of
@@ -98,7 +120,7 @@ Decentralization:
 
 Incentives to achieve mass adoption:
 
-**9. Incentivation for relayers** (not necessarily economical)
+**9. Incentivisation for relayers** (not necessarily economical)
 
 
 ### Things that are explicitly out of scope
