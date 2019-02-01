@@ -86,7 +86,8 @@ To contribute your project will need to commit some time to help specifying the 
 | Layer | Purpose | Examples |
 | ----- | ------- | -------- |
 | Application | Application logic | Chat app |
-| -> **Protocol** <- | Scalable, decentralised metadata protection | |
+| Storage / Sync | Sync data, make messages persistent | |
+| -> **Protocol**, **DHT** <- | Scalable, decentralised metadata protection | |
 | P2P | Overlay routing, NAT traversal | [libp2p](https://libp2p.io), [WebRTC](https://webrtc.org) |
 | Network | Underlay routing | [TCP / IP](https://en.wikipedia.org/wiki/Internet_protocol_suite) |
 
