@@ -1,4 +1,4 @@
-﻿Motivation
+Motivation
 We need an anonymous messaging protocol for use in distributed applications.  We want a “roadmap without potholes” for providing stronger privacy assurances than Tor for both senders and receivers, while also scaling well and providing short-term message storage for offline users.  In other words, we accept that a project this large requires a piecemeal approach but we shall understand and avoid design dead ends that prevent either scaling or rigorous analysis of anonymity properties. 
 Overview
 We think mix networks occupy a sweet spot in which nodes run extremely efficiently but rigorous analysis remains possible, if challenging.  There are designs like Tor with more efficient designs, but they cannot provide rigorous anonymity properties.  There are also numerous academic schemes designed to support rigorous analysis, but at extreme sacrifices in efficiency.  We choose a Sphinx-like packet format because it’s efficient, adaptable enough, and has good security proofs.  
@@ -13,7 +13,7 @@ We shall tweak Sphinx slightly to accommodate both receiver anonymity and short-
 We foresee the public key infrastructure (PKI) being the ultimate scaling bottleneck for all existing anonymity scheme designs.  We could avoid this with gossip protocols but these enable epistemic attacks.  We largely leave this to future work, but suggest investigating a verifiable gossip based protocol.  We shall therefore use an insecure gossip based protocol initially with the hope that it meshes best with later designs.  If we used a more secure design inspired by the Tor consensus then we might assumptions elsewhere that limit scalability later.
 
 
-We know rewards for node operators remains a contentious question in the anonymity community with seemingly unforeseeable consequences.  We nevertheless think rewards represents our best hope for a network large enough to challenge today’s centralized providers that operate on surveillance capitalism.  We do not imagine rewards obliviate the need to steward relay operator culture, possibly quite the opposite.
+We know rewards for node operators remains a contentious question in the anonymity community with seemingly unforeseeable consequences.  We nevertheless think rewards represents our best hope for a network large enough to challenge today’s centralised providers that operate on surveillance capitalism.  We do not imagine rewards obliviate the need to steward relay operator culture, possibly quite the opposite.
 Messaging
 We’re focusing on one-to-one messaging for now.  We actually do require messaging layer crypto, even after all the mix net layers, so expect an Axolotl-like ratchet for this.  
 
