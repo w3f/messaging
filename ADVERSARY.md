@@ -9,7 +9,7 @@ Since the protocol will be structured in several layers, the assumptions that ar
 - The adversary is unable to control all but one node in the network.
 
 #### Cryptography
-- The adversary has no access quantum computers which means that classical complexity-theoretic hardness assumptions apply.
+- The adversary has no access to quantum computers which means that classical complexity-theoretic hardness assumptions apply.
 - The storage capacity of the adversary can be considered as unlimited, i. e. messages stay confidential only for a certain amount of time, e. g. 10 years.
 
 #### Staking / SPAM protection
