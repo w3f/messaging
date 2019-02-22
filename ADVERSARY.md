@@ -13,6 +13,6 @@ Since the protocol will be structured in several layers, the assumptions that ar
 - The storage capacity of the adversary can be considered as unlimited, i. e. messages stay confidential only for a certain amount of time, e. g. 10 years.
 
 #### Staking / SPAM protection
-- The coin / time / computation resources of the adversary are limited. It costs the adversary a lot of effort / money / time to increase her attack power, so the more the adversary tries to spam the network, the more it becomes unprofitable her.
+- The coin / time / computation resources of the adversary are limited. It costs the adversary a lot of effort / money / time to increase her attack power, so the more the adversary tries to spam the network, the more it becomes unprofitable for [nir](https://genderneutralpronoun.wordpress.com/tag/ne/).
 
 ## Formal Adversary - coming soon
