@@ -6,7 +6,7 @@ Since the protocol will be structured in several layers, the assumptions that ar
 
 #### Network level
 - The adversary may select arbitrary participants of the network and observe all of their outgoing and incoming messages.
-- The adversary is unable to control all but one node in the network.
+- The adversary is unable to control all but its own nodes in the network.
 
 #### Cryptography
 - The adversary has no access quantum computers which means that classical complexity-theoretic hardness assumptions apply.
