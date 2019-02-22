@@ -23,7 +23,10 @@ Primary consideration in threat model is:
 Some consideration should also be given to a global active attacker (GAA), in
 additional to local/remote attacks. For example, it might be reasonable to
 detect GAA, but not be fully GAA resistant. A more complete threat model with
-respect to capabilities should be provided, see Briar for example.
+respect to capabilities should be provided, see the 
+[Briar](https://blog.grobox.de/2016/briar-next-step-of-the-crypto-messenger-evolution/)
+[threat model](https://code.briarproject.org/briar/briar/wikis/threat-model)
+for example.
 
 Participation Anonymity is less important. This is most likely to be a factor in
 terms of Censorship Resistance (deep packet inspection, traffic morphing), which
