@@ -16,9 +16,8 @@ Metadata that we want to protect are:
 
 **3. Sender-Receiver Unlinkability** (who is talking to whom?)
 
-Primary consideration in threat model is:
-
-- Global Passive Adversary resistant (GPA, insight into whole network)
+A primary consideration in the threat model is Global Passive Adversary 
+resistance (GPA, insight into the whole network).
 
 Some consideration should also be given to a global active attacker (GAA), in
 additional to local/remote attacks. For example, it might be reasonable to
