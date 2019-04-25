@@ -229,26 +229,19 @@ Contacts scheme shared by message storage-and-forwarding client, MLS, and the me
 
 ## 4. Data sync
 
-Uses message queue heavily.
+Uses message queue heavily.  ...
 
 Interfaces applications developers actually like and understand.  A priori, I'd handle reliability here since the data sync layer might utilize space more efficiently, due to understanding some relationships between messages parts to be combined by the message queue.
 
+We shall broadly take inspiration from Bramble, the data sync layer of Briar, as our considerations often mirror theirs, but projects like Swarm favor somewhat more general approaches.  See [Oskar's survey of data sync layers in messaging](https://github.com/status-im/bigbrother-specs/blob/master/data_sync/p2p-data-sync-comparison.md)
+
 ### 4a. Lower layer demo using pijul and/or git
 
-As a demo, we might adapt pijul and/or git for sending pushes through the message storage layer.  Adapting git for non-manual usage tends not to go far, but pijul might prove more widely usable.
+As a demo, we might adapt pijul and/or git for sending pushes through the message storage layer.  Adapting git for non-manual usage tends not to go far, but pijul might prove more widely usable, although I'm unsure if pijul handles shallow histories well.  
 
-### 4b. .
+### 4b. Bramble style DAG of messages
 
-Non-mixnet layers 
-required layers that 
+We'll want a Bramble style DAG of immutable messages presumably, so naively an grow-only DAG CRDT with low priority history.  It should be heavily optimised for syncing only the most recent messages, but might eventually share older messages opportunistically.  
 
-   - Status' analysis: https://github.com/status-im/bigbrother-specs/blob/master/data_sync/p2p-data-sync-comparison.md
-   - Compacting message and reinserting DAG
-   - Appears largely orthogonal to lower layers, except users run data sync between themsevles, not with message stores, because sync should compact messages to best exploit the fixed size mixnet packets.  Relationship with MLS needs clarification.
-
-
-###
-
-
-We consider layers 1-5 to be def`enses against powerful internet adversaries, but we'd like layer 6+ to operate over more local networks, including mesh networks.
+We should understand how much, if at all, this overlaps with MLS' room state DAG updates.  A priori, our incomplete history conflicts with supporting removes via a two-phase or last-write-wins DAG CRDT, but who knows.
 
