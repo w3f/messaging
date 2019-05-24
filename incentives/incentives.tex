@@ -34,11 +34,11 @@ incentive scheme correct packet routing.
 \medskip
 % \end{abstract}
 \section{Introduction}
-Anonymity systems like Tor \cite{} rely upon the altruism of relay operators and sometimes their financial doners.
+Anonymity systems like Tor \cite{Dingledine:2004:Tor} rely upon the altruism of relay operators and sometimes their financial doners.
 There is ocasional discussion around providing incentives to relay operators, but asking payments from users destroys anonymity by reducing the user base, aka anonymity set, even assuming an anonymous payment system with sufficient performance, and market penetration.  
 At the same time, anonymity systems do assess routers for some combination of perfromance, capacity, reliability, but do so using centralised infrastructure. 
 %
-In decryption mix networks a common technique to detect incorrect routing behavior is using designated cover traffic \{Loopix} \{Atom} \{Vuvuzela}. This type of cover traffic also helps with disguising the real amount traffic that enters and leaves a mix which in turn helps with making traffic analysis harder. We propose a decentralised but probabilistic sampling technique for incentivzing mix relay participation but also being available and reliable as follows.  
+In decryption mix networks a common technique to detect incorrect routing behavior is using designated cover traffic \{Loopix} \{Kwon:2017:Atom} \{vandenHooff:2015:Vuvuzela}. This type of cover traffic also helps with disguising the real amount traffic that enters and leaves a mix which in turn helps with making traffic analysis harder. We propose a decentralised but probabilistic sampling technique for incentivzing mix relay participation but also being available and reliable as follows.  
 
 Any mix network has mix clients send covert traffic, but we require a mix network in which many mix relays, or mixes, send some cover traffic too. In Loopix, mix nodes send cover traffic messages that traverse each strata, eventually looping back to the fitst strata, and continuing back to their sending mix.  
 These mix relay generated loops significantly reduces the adversary's advantage from monitoring mix nodes Theorem 1 vs 2 in \S4.1.3 of \cite{Loopix}.  % \cite[\S4.1.3: Theorem 1 vs 2]{Loopix}.  
