@@ -10,13 +10,15 @@
 
 \usepackage{changepage}   % for the adjustwidth environment
 
+\usepackage{textcomp}
+\newcommand{\microseconds}{\textmu s}
+
 \title{Assessing or incentivising correct mixing without authorities} % probabilistically and
 \author{Jeff Burdges}
 \date{}
 
 \newtheorem{question}{Question}
 
-\newcommand{\microseconds}{us}
 
 \begin{document}
 
@@ -27,8 +29,8 @@
 \it
 We describe a probabilistic assessment technique for % routers in a
 mix networks that employs cover traffic roughly similar to
-Loopix \cite{Loopix}.  We remark that this yields an 
-incentive scheme correct packet routing.
+Loopix \cite{Loopix}, which similarly provides a scheme to
+incentivise correct packet routing.
 \end{adjustwidth}
 \medskip
 % \end{abstract}
@@ -36,41 +38,46 @@ incentive scheme correct packet routing.
 Anonymity systems like Tor rely upon the altruism of relay operators and sometimes their financial doners.
 There is ocasional discussion around providing incentives to relay operators, but asking payments from users destroys anonymity by reducing the user base, aka anonymity set, even assuming an anonymous payment system with sufficient performance, market penetration, etc.  
 At the same time, anonymity systems do assess routers for some combination of perfromance, capacity, reliability, etc., but do so using centralised infrastructure. 
-%
-We propose a decentralised but probabilistic sampling technique for assessment of and/or incentives for mix relay availability and reliability.  
 
-Any mix network has mix clients send covert traffic, but we require a mix network in which many mix relays, or mixes, send some cover traffic too.  
-In Loopix, mix nodes send cover traffic messages that traverse each strata, eventually looping back to the fitst strata, and continuing back to their sending mix.  
-These mix relay generated loops significantly reduces the adversary's advantage from monitoring mix nodes Theorem 1 vs 2 in \S4.1.3 of \cite{Loopix}.  % \cite[\S4.1.3: Theorem 1 vs 2]{Loopix}.  
-They also enable defenses against active attacks like n-1 attacks in \S4.2.1 of \cite{Loopix}.  % \cite[\S4.2.1]{Loopix}.  
+We propose a decentralised but probabilistic sampling technique for assessment of and/or incentives for mix relay availability and reliability.  
+An incentives variant funds rewards with inflation of the rewards token, so users need not pay.
+
+Any mix network has mix clients send covert traffic, but we require a mix network in which at least some mix relays, or mixes, send cover traffic too.  
+In Loopix, mix nodes send cover traffic messages that traverse each strata, eventually looping back to the first strata, and continuing back to their sending mix.  
+These mix relay generated loops significantly reduces the adversary's advantage from monitoring mix nodes, see Theorem 1 vs 2 in \S4.1.3 of \cite{Loopix}.  % \cite[\S4.1.3: Theorem 1 vs 2]{Loopix}.  
+They also enable defenses against active attacks like n-1 attacks, see \S4.2.1 of \cite{Loopix}.  % \cite[\S4.2.1]{Loopix}.  
 In this vein, relay generated loops were first introduced as ``heartbeat'' messages in RGB mix networks \cite{RGB_Heartbeat} ``in order to establish its state of connectivity with the rest of the network''.
 
-We first have a limited number of mixes produce cover traffic using verifiable random functions.  
-After all messages are routed through the mixnet, we hold a lottery using collaborative randomness, in which cover traffic packets by several of these mixes’ win, and those mixes may reveal the winning packets seed.  
+We first have a limited number of mixes produce cover traffic using random seeds provided by verifiable random functions (VRF). 
+After all messages are routed through the mix network, we hold a lottery using collaborative randomness, in which cover traffic packets by several of these mixes’ win, and those mixes reveal the seeds of the winning packets. 
 We ensure the routes taken by these packets are hard to bias because the winning pool of mixes is limited, and they produce their packets using VRFs.  
-It follows that paying the mixes along the packet’s route should distribute payments fairly, according to the route selection rules. 
+We argue these winning packets provide an sufficiently unbiased random sample of routing behavior.
 
-We require that mixes provide a proof, from a commitment to their in coming and out going packets, that they forwarded the winning cover traffic paket message.  
+We also require that mixes provide a proof, from a commitment to their in coming and out going packets, that they forwarded the winning cover traffic paket message.  
 If all do so, then all receive credit for correct routing, but none receive credit if any drop the packet.
 % In the end, the more messages a mix is relaying the more chances it has to be rewarded, again subject to the route selection rules for loop cover packets.  
 
 At some level, our sampling procedure resembles Ouroboros Praos \cite{OuroborosPraos} except, instead of producing blocks only when winning a VRF contest, all our VRF outputs produce cover packets, and the winners are selected in some future epoch.  
 
-In terms of anonymity, we impact the defenses provided by the loop cover traffic, as well as protections afforded by total traffic.  We’d expect active defenses might be fully utilised before the lottery, but warn that if mixes sample traffic differently using say Brahms then this represents a leakage.  We expect minimal reduction in total traffic.  We shall investigate using cover traffic originating from users as well, but this requires further analysis, and limiting eligible users remains tricky.
+In terms of anonymity, we impact the defenses provided by the loop cover traffic, as well as protections afforded by total traffic.  We’d expect active defenses might be fully utilised before the lottery, but warn that if mixes sample traffic differently, using say Brahms, then this represents a leakage.  We expect minimal reduction in total traffic.  We could investigate using cover traffic originating from users as well, but this requires further analysis, and limiting eligible users remains tricky.
 
 \section{Sampling} % cover traffic
 
-We assume some fraction of mixes posses a threshold level of ``stake'' in some limited resource, maybe a cyber-coin aka crypto-currency, not necessarily transferable.  We require only that the number of sufficiently staked nodes be known, not that all mixes are staked, nor do we need the ability to slash for miss behavior.  All staked mixes commit to a verifiable random function (VRF) key $V = v G$.  
+We assume some fraction of mixes posses a threshold level of ``stake'' in some limited resource,
+ but not necessarily anything transferable like a cyber-coin aka crypto-currency.  In other words, we require only that the number of staked nodes be known, not that all mixes are staked, nor do we need the ability to slash for miss behavior.  
+All staked mixes commit to a verifiable random function (VRF) key $V = v G$.  We suggest VRFs with only batch verification not aggregation like VEd25519 or NSEC5 because far more packets are produced than win lotteries. 
+% We must keep non-winning VRF outputs secret so actual aggregation using BLS requires some delicate optimisations, and sounds like overkill.
 
-We prefer if at least the staked nodes have some shared global view of the whole mix network, like the consensus in Tor, but not necessarily shared with clients.  If however our mix network has no global view, then staked nodes must commit to their view of the network as well.  We suggest pairing-free VRFs with batch verification like VEd25519 or NSEC5 because very few packets shall win these lotteries.  We must keep non-winning VRF outputs secret so actual aggregation using BLS requires some delicate optimisations, and sounds like overkill.
+We prefer if at least the staked nodes have some shared global view of the whole mix network, like the consensus in Tor, but we need not share this global view with clients.  If however our mix network has no global view, then staked nodes must commit to their view of the network as well. 
 
-We require a collaborative randomness beacon that sets epochs and releases a shared random value $r_i$ in each epoch $i$.  In each epoch, each mix $V$ with sufficient stake computes:
+
+We require a collaborative randomness beacon that sets epochs and releases a shared random value $r_i$ in each epoch $i$.  In epoch $i$, each mix $V$ with sufficient stake computes:
 \begin{itemize}
 \item an epoch value $e_{V,i} := VRF_v(r_i)$, and
 \item packet seeds $p_{V,i,j} := VRF_v(r_i || j)$.
 \end{itemize}
 
-Any staked mixes should send a cover packets created with a CSPRNG seeded by $p_{V,i,j}$ for each $j < j_{\max}$, and commit network view if required.  We have a hard limit $j_{\max}$ on $j$ so the mix cannot ``play the lottery'' too many times.  At the same time, we send packets with delays that obey a memoryless exponential or geometric distribution, depending if time is continuous or discret. 
+Any staked mixes should send a cover packets created with a CSPRNG seeded by $p_{V,i,j}$ for each $j < j_{\max}$, and commit to their network view if required.  We have a hard limit $j_{\max}$ on $j$ so the mix cannot ``play the lottery'' too many times.  At the same time, we send packets with delays that obey a memoryless exponential or geometric distribution, depending if time is continuous or discret. 
 
 An Erlang distribution with parameters lambda and $k := j_{\max}$ gives the sum of $j_{\max}$ exponential distributions with rate $\lambda$, so the Erlang CDF can tell us the {\em overrun probability} $p_O$ a mix could send more than $j_{\max}$ messages in an epoch.  A negative binomial distribution yields a similar estimate when we discretise time using a geometric instead of an exponential distribution.  We might worry that $p_O$ too low or high encourages sending too little or too much cover traffic, at least if working in a rational threat model.  
 
@@ -99,12 +106,12 @@ leaks nothing about other epochs.
 Do we need proofs that packets were sent at correct times?
 \end{question}
 
-We ask all nodes to commit to their replay protection database when an epoch ends.  We then in epoch $i+1$ run a lottery by seeding another CSPRNG with $e_{V,i+1}$ to test (a) if mix $V$ won epoch $i$, and (b) for which $j$ they won.  If $V$ wins then $V$ reveals $e_{V,i+1}$ and $p_{V,i,j}$, or harmlessly equivocates.  In this, $V$ also provides proofs that its sampled its network view honestly when building the packet for $p_{V,i,j}$, which are trivial in the case of a global network view.  It publishes this winning notice and attempts to notify nodes named in the route taken by packet $p_{V,i,j}$.  Any nodes named in the route taken by of packet $p_{V,i,j}$ then publish the proof that $p_{V,i,j}$ appeared in their replay protection database.  If all nodes in the route $p_{V,i,j}$ took reveal their proofs, then they all get paid, along with $V$.  We expect nobody gets paid if any node equivocates because otherwise dropped packets bias towards earlier strata.
+We ask all nodes to commit to the packets they relayed when an epoch ends, possibly by committing to their replay protection database.  We then in epoch $i+1$ run a lottery by seeding another CSPRNG with $e_{V,i+1}$ to test (a) if mix $V$ won epoch $i$, and (b) for which $j$ they won.  If $V$ wins then $V$ reveals $e_{V,i+1}$ and $p_{V,i,j}$, or harmlessly equivocates.  In this, $V$ also provides proofs that its sampled its network view honestly when building the packet for $p_{V,i,j}$, which are trivial in the case of a global network view.  It publishes this winning notice and attempts to notify nodes named in the route taken by packet $p_{V,i,j}$.  Any nodes named in the route taken by of packet $p_{V,i,j}$ then publish the proof that $p_{V,i,j}$ appeared in their replay protection database.  If all nodes in the route $p_{V,i,j}$ took reveal their proofs, then they all get paid, along with $V$.  We expect nobody gets paid if any node equivocates because otherwise dropped packets bias towards earlier strata.
 
-We believe these replay protection database commitments prevent bribery attacks where staked mixes do not send cover traffic, but merely commit to VRF keys and then bribe other mixes to claim they forwarded the winning packet.  There are good odds such protections may be overkill, except we might reward forwarding mixes far more than $V$ itself, which makes the bribery attack simple.  We do not reward any nodes if any nodes equivocate for the same reason.  We can limit replay protection database sizes too, but doing so requires reliable bandwidth measurements.
+Incentivised variants likely reward relaying mixes far more than $V$ itself, so these commitments prevent bribery attacks where staked mixes do not send cover traffic, but merely commit to VRF keys and then bribe other mixes to claim they forwarded the winning packet.  
 
 \begin{question}
-Do we need replay protection database commitments?
+Are relaying commitments critical?
 \end{question}
 
 We must rotate routing keys, but we envision routing keys living much longer than epochs, so actually doing commitments with the actual replay protection database requires slightly larger proofs.  If epochs are short, then we can simply have duplicate replay protection databases.  We envision replay protection databases being cuckoo filters, so that some cryptographic materials about each packet can be retained, but leave this as an implementation detail.
@@ -117,7 +124,7 @@ We must rotate routing keys, but we envision routing keys living much longer tha
 % Avoid epochs being too rigid and simplify the protocol
 % \end{question}
 
-% ...
+We need the shared random values $r_i$ to have minimal adversarial bias, ala malicious mining.  We want to adapt ideas from the Ouroboros Praos \cite{OuroborosPraos} analysis to determine how many winners we require to limit adversarial bias acceptably, although unbiased collaborative randomness schemes like RandHerd or VDFs work too.
 
 \section{Assessment}
 
