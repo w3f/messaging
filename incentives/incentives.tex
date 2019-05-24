@@ -35,7 +35,7 @@ incentivise correct packet routing.
 \medskip
 % \end{abstract}
 
-Anonymity systems like Tor rely upon the altruism of relay operators and sometimes their financial doners.
+Anonymity systems like Tor  \cite{Dingledine:2004:Tor} rely upon the altruism of relay operators and sometimes their financial doners.
 There is ocasional discussion around providing incentives to relay operators \cite{TorPathToTorCoin}, 
 but asking payments from users destroys anonymity by reducing the user base, aka anonymity set, even assuming an anonymous payment system with sufficient performance and market penetration.  
 At the same time, anonymity systems do assess routers for some combination of perfromance, capacity, and reliability, but do so using centralised infrastructure. 
@@ -49,7 +49,8 @@ Any mix network has mix clients send covert traffic, but we require a mix networ
 In Loopix, mix nodes send cover traffic messages that traverse each strata, eventually looping back to the first strata, and continuing back to their sending mix.  
 These mix relay generated loops significantly reduces the adversary's advantage from monitoring mix nodes, see Theorem 1 vs 2 in \S4.1.3 of \cite{Loopix}.  % \cite[\S4.1.3: Theorem 1 vs 2]{Loopix}.  
 They also enable defenses against active attacks like n-1 attacks, see \S4.2.1 of \cite{Loopix}.  % \cite[\S4.2.1]{Loopix}.  
-In this vein, relay generated loops were first introduced as ``heartbeat'' messages in RGB mix networks \cite{RGB_Heartbeat} ``in order to establish its state of connectivity with the rest of the network''.
+In this vein, relay generated loops were first introduced as ``heartbeat'' messages in RGB mix networks \cite{RGB_Heartbeat} ``in order to establish its state of connectivity with the rest of the network'', but similar constructions have appeared in many recent schemes.
+% like \cite{Kwon:2017:Atom} and \cite{vandenHooff:2015:Vuvuzela}.
 
 We first have a limited number of mixes produce cover traffic using random seeds provided by verifiable random functions (VRF). 
 After all messages are routed through the mix network, we hold a lottery using collaborative randomness, in which cover traffic packets by several of these mixes’ win, and those mixes reveal the seeds of the winning packets. 
