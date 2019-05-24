@@ -131,10 +131,10 @@ We need the shared random values $r_i$ to have minimal adversarial bias, ala mal
 We assess mixes primarily to provide useful information to clients,
 especially each mixes' chances for dropping packets.
 
-We learn about dropped packets only if mixes publish winning
+We learn about dropped packets only if $V$ publish their winning
 $p_{V,i,j}$ even when the cover packet itself got dropped.  
-An incentivising variant should therefore partially reward packet
-senders somewhat even for dropped packets. 
+An incentivising variant should therefore reward packet senders even
+for dropped packets. 
 An altruistic variant might use cover loops that terminate at some
 random node in the sender's strata, not at the sender themselves.
 These do hide mix fullness, but do not detect $n-1$ attacks, making
