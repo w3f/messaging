@@ -10,11 +10,13 @@
 
 \usepackage{changepage}   % for the adjustwidth environment
 
-\title{Assessing or incentivising correct mixing probabilistically and without authorities}
+\title{Assessing or incentivising correct mixing without authorities} % probabilistically and
 \author{Jeff Burdges}
 \date{}
 
 \newtheorem{question}{Question}
+
+\newcommand{\microseconds}{us}
 
 \begin{document}
 
@@ -25,17 +27,17 @@
 \it
 We describe a probabilistic assessment technique for % routers in a
 mix networks that employs cover traffic roughly similar to
-Loopix \cite{Loopix}, which equivalently incentivises correct packet
-routing.
+Loopix \cite{Loopix}.  We remark that this yields an 
+incentive scheme correct packet routing.
 \end{adjustwidth}
 \medskip
 % \end{abstract}
 
 Anonymity systems like Tor rely upon the altruism of relay operators and sometimes their financial doners.
-There is some discussion around providing incentives to relay operators, but asking payments from users destroys anonymity by reducing the user base, aka anonymity set, even assuming an anonymous payment system with sufficient performance, market penetration, etc.  
+There is ocasional discussion around providing incentives to relay operators, but asking payments from users destroys anonymity by reducing the user base, aka anonymity set, even assuming an anonymous payment system with sufficient performance, market penetration, etc.  
 At the same time, anonymity systems do assess routers for some combination of perfromance, capacity, reliability, etc., but do so using centralised infrastructure. 
 %
-We propose a decentralised but probabilistic sampling technique for assessment and/or incentives of mix relay availability and reliability.  
+We propose a decentralised but probabilistic sampling technique for assessment of and/or incentives for mix relay availability and reliability.  
 
 Any mix network has mix clients send covert traffic, but we require a mix network in which many mix relays, or mixes, send some cover traffic too.  
 In Loopix, mix nodes send cover traffic messages that traverse each strata, eventually looping back to the fitst strata, and continuing back to their sending mix.  
@@ -49,7 +51,8 @@ We ensure the routes taken by these packets are hard to bias because the winning
 It follows that paying the mixes along the packet’s route should distribute payments fairly, according to the route selection rules. 
 
 We require that mixes provide a proof, from a commitment to their in coming and out going packets, that they forwarded the winning cover traffic paket message.  
-If all do so, they are all rewarded in an incentives scheme.  In the end, the more messages a mix is relaying the more chances it has to be rewarded, again subject to the route selection rules for loop cover packets.
+If all do so, then all receive credit for correct routing, but none receive credit if any drop the packet.
+% In the end, the more messages a mix is relaying the more chances it has to be rewarded, again subject to the route selection rules for loop cover packets.  
 
 At some level, our sampling procedure resembles Ouroboros Praos \cite{OuroborosPraos} except, instead of producing blocks only when winning a VRF contest, all our VRF outputs produce cover packets, and the winners are selected in some future epoch.  
 
@@ -75,9 +78,9 @@ We could avoid these concerns by making sending times deterministic in
 one of several ways:
 
 First, if $j_{\max}$ is large and denominated in time, then we only send 
-cover messages when $H_{\mathrm{"GO"}}(p_{V,i,j}) < {j_{\max} \over \lambda}$. 
+cover messages when $H_{\mathrm{send}}(p_{V,i,j}) < {j_{\max} \over \lambda}$. 
 We expect evaluating typical VRFs requires one scalar multiplication,
-roughly 20ms, a computational costs for smaller time units.
+roughly 20\microseconds, so some costs for small time units.
 
 Second, we might sample the number $j_{\max}$ of cover messages $V$
 sends in the $i$th epoch from a Poisson or Binomial distribution seeded
@@ -98,7 +101,7 @@ Do we need proofs that packets were sent at correct times?
 
 We ask all nodes to commit to their replay protection database when an epoch ends.  We then in epoch $i+1$ run a lottery by seeding another CSPRNG with $e_{V,i+1}$ to test (a) if mix $V$ won epoch $i$, and (b) for which $j$ they won.  If $V$ wins then $V$ reveals $e_{V,i+1}$ and $p_{V,i,j}$, or harmlessly equivocates.  In this, $V$ also provides proofs that its sampled its network view honestly when building the packet for $p_{V,i,j}$, which are trivial in the case of a global network view.  It publishes this winning notice and attempts to notify nodes named in the route taken by packet $p_{V,i,j}$.  Any nodes named in the route taken by of packet $p_{V,i,j}$ then publish the proof that $p_{V,i,j}$ appeared in their replay protection database.  If all nodes in the route $p_{V,i,j}$ took reveal their proofs, then they all get paid, along with $V$.  We expect nobody gets paid if any node equivocates because otherwise dropped packets bias towards earlier strata.
 
-We believe these replay protection database commitments prevent bribery attacks where staked mixes do not send cover traffic but merely commit to VRF keys and then bribe other mixes to claim they forwarded the winning packet.  There are good odds such protections may be overkill, except we might reward forwarding mixes far more than $V$ itself, which makes the bribery attack simple.  We do not reward any nodes if any nodes equivocate for the same reason.  We can limit replay protection database sizes too, but doing so requires overly reliable bandwidth measurements.
+We believe these replay protection database commitments prevent bribery attacks where staked mixes do not send cover traffic, but merely commit to VRF keys and then bribe other mixes to claim they forwarded the winning packet.  There are good odds such protections may be overkill, except we might reward forwarding mixes far more than $V$ itself, which makes the bribery attack simple.  We do not reward any nodes if any nodes equivocate for the same reason.  We can limit replay protection database sizes too, but doing so requires reliable bandwidth measurements.
 
 \begin{question}
 Do we need replay protection database commitments?
@@ -114,46 +117,72 @@ We must rotate routing keys, but we envision routing keys living much longer tha
 % Avoid epochs being too rigid and simplify the protocol
 % \end{question}
 
-
+% ...
 
 \section{Assessment}
 
-We assess relays primarily to provide useful information about mixes
-to clients, especially each mixes' chances for dropping packets.
+We assess mixes primarily to provide useful information to clients,
+especially each mixes' chances for dropping packets.
 
-We do learn about dropped packets provided mixes publish any winning
-$p_{V,i,j}$ even when the cover packet was dropped.  If we worry mixes
-might not report dropped packets, then we could use cover loops that
-terminate at a random node in the sender's strata, not at the sender
-themselves, which do not detect $n-1$ attacks but do hide mix fullness.
+We learn about dropped packets only if mixes publish winning
+$p_{V,i,j}$ even when the cover packet itself got dropped.  
+An incentivising variant should therefore partially reward packet
+senders somewhat even for dropped packets. 
+An altruistic variant might use cover loops that terminate at some
+random node in the sender's strata, not at the sender themselves.
+These do hide mix fullness, but do not detect $n-1$ attacks, making
+them less efficient.  
 
-In such cases, we could model epochs with a binomial, or perhaps
-hypergeometric, distribution for the number of dropped packets out of
-the number of packets passing through the node, and thus compute the
-assessment using the maximum likelihood estimator over many epochs.
-We note that correlated failures from offline events prevent applying
-the Poisson limit theorem to obtain a Poisson distribution here.
+In all cases, we could model epochs with a binomial or hypergeometric
+distribution for the number of dropped packets out of the number of
+packets passing through the node, and thus compute an assessment
+using the maximum likelihood estimator over several epochs.
+% We note that correlated failures from offline events prevent applying
+% the Poisson limit theorem to obtain a Poisson distribution here.
+We think this addresses the uneven sampling of our VRF based procedure,
+but requires more epochs than a centralised assessment design.
+
+As indicated above, we attribute packet drops to the whole route
+specified in the packet, never specific mixes.  In other words, our
+VRF scheme attributes one drop per strata, with all but one being false
+positives, but with these false positives being uniformly distributed
+and independent.  We note that centralised assessment scheme encounter
+similar problems because they must obey the network topology.
+
+We do know adjacent nodes who disagree about some packet's existence
+of course, so we could reduces this false positive rate, but doing so
+requires much more careful analysis of adversarial behavior.
+We encounter a messy fair exchange problem if going further to uniquely
+attribute drops, but network problems cannot necessarily be correctly
+attributed anyways.
+
+% \section{Economics}
+\smallskip
+
+Incentivising variants should avoid biasing attacks caused by
+stake accumulations due to ``richer get richer'' problems \cite{CompoundingPoS}.
+We therefore suggest that ``stake'' accumulate automatically for
+routers of winning packets, but not for the packet senders, and that
+``stake'' be non-transferable and decay over time. 
+
+We also think this ``stake'' measure should differ from our routing
+assessment used by clients.  In particular, if dropped packets reduced
+anyone's stake then nodes would not report dropped winning packets
+that harmed their allies. 
 
 
-
-We accept the inequitable samples produced by this prodecure, 
-
-\cite{CompoundingPoS}
-
-
-We face two 
-
-Intuitively. if stakes nodes are honest then our sampling procedure should provide 
-
-Intuitively, our sampling procedure provides exactly the statistics 
-
-We must produce useful information about nodes  
 
 
 \bibliographystyle{abbrv}
 \bibliography{mix,pos} % ,nonmix,or,msg,pq,rlwe,sidh,gnunet
 
 \end{document}
+
+
+We envision incentives being paid to both the senders and the routers
+of winning packets.  If the incentive is some transferable token then
+our incentives clearly creates inflation.  At the same time, we provide
+no justification 
 
 
 
