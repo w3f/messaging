@@ -75,7 +75,7 @@ project and initial mapping of the space until initial contributors are happy wi
 
 ### Project contributors (in alphabetical order)
 - [Status](https://status.im)
-- [Validity Labs](https://validitylabs.org)
+- [Validity Labs](https://validitylabs.org) - [HOPR](https://github.com/validitylabs/hopr)
 - [Web3 Foundation](https://web3.foundation)
 
 
