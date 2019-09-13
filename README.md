@@ -203,7 +203,7 @@ gossip protocols but these enable epistemic attacks. We largely leave this to
 future work, but suggest investigating a verifiable gossip based protocol. We
 shall therefore use an insecure gossip based protocol initially with the hope
 that it meshes best with later designs. If we used a more secure design inspired
-by the Tor consensus then we might assumptions elsewhere that limit scalability
+by the Tor consensus, then we might make assumptions elsewhere that limit scalability
 later.
 
 We know rewards for node operators remains a contentious question in the
