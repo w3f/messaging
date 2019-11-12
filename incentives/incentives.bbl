@@ -1,0 +1,30 @@
+\begin{thebibliography}{1}
+
+\bibitem{RGB_Heartbeat}
+G.~Danezis and L.~Sassaman.
+\newblock Heartbeat traffic to counter (n-1) attacks.
+\newblock pages 89--93, 01 2003.
+
+\bibitem{OuroborosPraos}
+B.~David, P.~Ga{\v{z}}i, A.~Kiayias, and A.~Russell.
+\newblock Ouroboros praos: An adaptively-secure, semi-synchronous
+  proof-of-stake protocol, 2017.
+\newblock https://eprint.iacr.org/2017/573.
+
+\bibitem{CompoundingPoS}
+G.~Fanti, L.~Kogan, S.~Oh, K.~Ruan, P.~Viswanath, and G.~Wang.
+\newblock Compounding of wealth in proof-of-stake cryptocurrencies, 09 2018.
+
+\bibitem{TorPathToTorCoin}
+M.~Ghosh, M.~Richardson, B.~Ford, and R.~Jansen.
+\newblock A {T}or{P}ath to {T}or{C}oin: Proof-of-bandwidth altcoins for
+  compensating relays.
+\newblock {\em HotPETs}, 2014.
+
+\bibitem{Loopix}
+A.~M. Piotrowska, J.~Hayes, T.~Elahi, S.~Meiser, and G.~Danezis.
+\newblock The loopix anonymity system.
+\newblock In {\em 26th {USENIX} Security Symposium ({USENIX} Security 17)},
+  pages 1199--1216, 2017.
+
+\end{thebibliography}
