@@ -1,0 +1,16 @@
+\begin{thebibliography}{1}
+
+\bibitem{anonymity_trilemma}
+D.~{Das}, S.~{Meiser}, E.~{Mohammadi}, and A.~{Kate}.
+\newblock Anonymity trilemma: Strong anonymity, low bandwidth overhead, low
+  latency - choose two.
+\newblock In {\em 2018 IEEE Symposium on Security and Privacy (SP)}, pages
+  108--126, May 2018.
+
+\bibitem{Loopix}
+A.~M. Piotrowska, J.~Hayes, T.~Elahi, S.~Meiser, and G.~Danezis.
+\newblock The loopix anonymity system.
+\newblock In {\em 26th {USENIX} Security Symposium ({USENIX} Security 17)},
+  pages 1199--1216, 2017.
+
+\end{thebibliography}
