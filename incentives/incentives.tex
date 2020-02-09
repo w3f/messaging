@@ -85,13 +85,13 @@ We prefer if at least the staked nodes have some shared global view of the whole
 
 We require a collaborative randomness beacon that sets epochs and releases a shared random value $r_i$ in each epoch $i$.  In epoch $i$, each mix $V$ with sufficient stake computes:
 \begin{itemize}
-\item an epoch value $e_{V,i} := VRF_v(r_i)$, and
-\item packet seeds $p_{V,i,j} := VRF_v(r_i || j)$.
+\item an epoch value $e_{V,i} := \mathtt{VRF}_v(r_i)$, and
+\item packet seeds $p_{V,i,j} := \mathtt{VRF}_v(r_i || j)$.
 \end{itemize}
 
 Any staked mixes should send a cover packets created with a CSPRNG seeded by $p_{V,i,j}$ for each $j < j_{\max}$, and commit to their network view if required.  We have a hard limit $j_{\max}$ on $j$ so the mix cannot ``play the lottery'' too many times.  At the same time, we send packets with delays that obey a memoryless exponential or geometric distribution, depending if time is continuous or discret. 
 
-An Erlang distribution with parameters lambda and $k := j_{\max}$ gives the sum of $j_{\max}$ exponential distributions with rate $\lambda$, so the Erlang CDF can tell us the {\em overrun probability} $p_O$ a mix could send more than $j_{\max}$ messages in an epoch.  A negative binomial distribution yields a similar estimate when we discretise time using a geometric instead of an exponential distribution.  We might worry that $p_O$ too low or high encourages sending too little or too much cover traffic, at least if working in a rational threat model.  
+An Erlang distribution with parameters $\lambda$ and $k := j_{\max}$ gives the sum of $j_{\max}$ exponential distributions with rate $\lambda$, so the Erlang CDF can tell us the {\em overrun probability} $p_O$ a mix could send more than $j_{\max}$ messages in an epoch.  A negative binomial distribution yields a similar estimate when we discretise time using a geometric instead of an exponential distribution.  We might worry that $p_O$ too low or high encourages sending too little or too much cover traffic, at least if working in a rational threat model.  
 
 We could avoid these concerns by making sending times deterministic in
 one of several ways:
@@ -147,7 +147,7 @@ We learn about dropped packets only if $V$ publish their winning
 $p_{V,i,j}$ even when the cover packet itself got dropped.  
 Incentivising variants should thus reward packet senders even
 for dropped packets. 
-An altruistic variant might use cover loops that terminate at some
+An altruistic variant might use cover packets that terminate at some
 random node in the sender's strata, not at the sender themselves.
 These do hide mix fullness, but do not detect $n-1$ attacks, making
 them less efficient.  
