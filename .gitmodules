@@ -1,0 +1,3 @@
+[submodule "incentives/talks/vrf_luck-rwc2021/CAC"]
+	path = incentives/talks/vrf_luck-rwc2021/CAC
+	url = https://github.com/CardsAgainstCryptography/CAC

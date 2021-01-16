@@ -1,0 +1,92 @@
+# Verifiable hidden luck in games
+
+We want verifiable random functions (VRFs) to become a more mature and developer friendly cryptographic primitive.  We think this goal can be furthered by exploring how/when VRFs fit or do not fit with supplying randomness for "fun games", as opposed to only the highly adversarial and high stakes "security (mathematical) games" we usually explore in distributed systems.  In particular, we hope "fun games" provide examples which helps prioritize which variations upon VRFs receive deeper work on optimization and developer friendly interfaces.
+
+There exist other cryptographic topics besides VRFs applicable to games, like
+- enforcing a fog of war using using oblivious set intersection and oblivious function evaluation (see [OpenConflict](https://crypto.stanford.edu/~dabo/pubs/papers/onlinegames.pdf)), or
+- structuring commitments of actions to strengthen the adversarial model beyond honest-but-curious.
+
+We'll reference such techniques in examples below, and some tricks like oblivious function evaluation wind up related to VRFs, but overall our purpose here is to discuss the creation and applicability of verifiable but private randomness.
+
+## Verifiable random functions 
+
+Advanced protocols often require participants base their actions upon random seeds, so such protocols become unfair when one party spends computational resources trying many possible random seeds.  Ignoring this unfairness leads to catastrophes like bitcoin.
+
+A verifiable random function (VRF) is a [cryptographic signature](https://en.wikipedia.org/wiki/Digital_signature#Definition) whose verification procedure yields an output $\omega$ that is a deterministic function of the public key $\textrm{pk}$ and the input message $m$ being signed, and also this function appears both
+- hard to compute without knowledge of the secret key and
+- pseudo-random even with knowledge of the secret key.
+
+If used correctly, VRFs provide each protocol participant with limited but unforeseeable randomness, and permits them to prove they used the correct randomness.
+
+## Inputs and outputs
+
+Although limits apply, signatures often provide stronger assurances as their input message becomes longer and covers more.  VRFs have the opposite behavior in that shorter input messages limit VRF secret key holders' choices, and hence limits their attempts to find a favorable output.
+
+VRFs cannot provide magical randomness from nothing of course.  VRFs always require their input message contain some fair public randomness, so a VRF input message normally consists of this fair public randomness and some restricted context. 
+
+In other words, VRFs produce an information asymmetry in which once the fair public randomness becomes known then only the participant knows their VRF output, and then they base their decisions upon this output.
+
+We could produce this fair public randomness in numerous ways.  An interesting simple way known as [Ouroboros Praos](https://eprint.iacr.org/2017/573.pdf) is to collect VRF outputs based upon input of some previous fair public randomness over some long enough epoch, and then hash them together to produce a subsequent fair public randomness.  This admits some bias and requires long epochs, so other options maybe be preferable in practice.
+
+## Instantiations 
+
+There are many VRF constructions known in cryptography, but all incur minor costs so signature schemes deployed in TLS never yield VRFs directly.  RSA-PSS and Rabin-Williams do not yield VRFs, but RSA-FDH does, and bespoke Rabin-Williams variants give extremely fast VRFs.
+
+BLS signatures are famous for yielding VRFs, but actually they run extremely slowly.  BLS should be avoided except for in niche situations using threshold distributed key generation (DKG) protocols.  We cannot easily deploy DKGs in typical distributed systems, and maybe DKGs do not work in large open world games, but DKGs should work in games with few players.
+
+Among the simple VRFs, one should usually implement a Schnorr-like DLEQ proof with an elliptic curve, similar to [NSEC5](https://eprint.iacr.org/2017/099.pdf), which runs much faster than RSA or BLS, and permits signing an auxiliary message not included in the input.  In these, we compute the output like $H(m, \textrm{sk} * H'(m))$ where $H'$ hashes-to-curve, meaning $H'$ is a hash function that outputs a pseudo-random elliptic curve point with no known discrete logarithm relations to other elliptic curve points in play.
+
+We shall discuss other instantiations below that employ zkSNARKs to hide the input $m$ or the public key while proving important features of them.  As a rule, these changes require substancial developer work, but nothing herculean, and zkSNARK tooling is rapidly improving, ala https://github.com/arkworks-rs
+
+## Card game example: Uno
+
+We take a small circle of players with infinitely many Uno decks shuffled together.  Infinitely many decks prevents card counting.  We discuss card counting further below but it complicates matters.
+
+All players collectively create an initial fair shared random seed $x_0$ in two rounds by first giving a hash commitment to some contribution they create randomly, like their VRF public key, and then revealing this contribution after everyone commits.  After the second aka reveal round all contribution are hashed together in lexicographic order to produce the shared fair random value $x_0$.  Aborts after the first aka commit round count as cheating because doing so biases $x_0$.  At this point, each player $i$ has a VRF secret key $\textrm{sk}_i$ and a corresponding VRF public key $\textrm{pk}_i$ known by everyone.
+
+All players pull cards from the infinite deck by computing their VRF with some input seed $x$ concatenated with a round and draw numbers, and from the output stream sample two bits to determine the suite and rejection sample a number between 0 and 14 for the face. 
+
+All card plays occur by revealing the VRF that proved you drew the card, but players simply hide what cards they drew until they wish to play them.
+
+We use $x = x_0$ concatenated with negative round numbers for the initial hand, but we need $x$ to evolve as rounds progress or else all players would know all their future draws from the first round.  We achieve this by the $i$th player running their VRF a second time on input $x_k || \textrm{"RNG"}$ and then hashing all players outputs together to produce the $x_{k+1}$ for the next round.  Aborts count as loosing the game and possibly cheating.  All players retain the history of $x_k$ values to verify plays.
+
+Could we have merged this second VRF usage into the first?  Not easily.  We want to hide the card drawn until we play the card, so we'd need to compute $x_{k+1}$ by hashing together the cards played, but then the last player has more influence over $x_{k+1}$ and two conspiring players have even more influence.
+
+Aside form the infinite deck, how does this differ from Uno played with real cards?  All players reveal exactly when in the past they drew a card when playing the card, which permits stronger deductions about what else lives in each players hand. 
+
+## Hash-to-curve zkSNARK gadget
+
+Could we hide when players drew cards they play?  Yes, but it requires a zkSNARK that proves the output is computed correctly from some $m$ that lies in the past.  We do this by building a merkle tree of all $x_i$ seen so far, and whether we drew one, two, or four in that round, and producing a proof for this merkle root.  As a complication, all current implementations of hash-to-curve gadgets were designed for applications that constrain $m$ less, which could be fixed but requires some effort.  
+
+In my view, one should first explore exposing this information about $m$ in some way that makes it fair to all players, especially if interested in game interfaces different from card games.
+
+## Generated maps
+
+There are games that generate the world as users explore, like Minecraft and rogue-likes, so VRF help provide randomness with which we generate the map, much like they provide our card draws above.  We should share maps with other users however, which adds some complexity.  
+
+As users know their VRF output once they know the shared random seed $x_i$, we presumably need users to commit to their exploration movements before learning $x_i$.  We've several points like this that look delicate in a large word with thousands of players.
+
+Assuming a small world with few players, if we have no fog of war then we might share VRFs at turn ends, which gives users some advance knowledge but reveals the new map quite quickly.  If however we have some fog of war system, then regular VRFs still reveal who generated which region and when, which reveals everyones' exploration history.
+
+We fix this by building our VRF from a ring signature (or a group signature).  In other words, users produce ring VRF signatures that prove some user produced the randomness correctly, hide which user did so.  Although more complex than regular VRFs, these ring VRF work just like shielded transactions in Zcash and they're becoming even more performant.  
+
+We build ring VRFs with general purpose zkSNARKs so one could easily encode additional logic, like that users can only move one square per turn, similarly to how Zcash preserves total balance in their shielded transactions.  As an aside, identity systems using a ring VRF or group VRF could provide OpenID-like convenience, but leak nothing about users' activity.  This makes them a high priority for ethical reasons.
+
+
+
+
+
+
+
+
+
+
+## Other
+
+https://www.cs.bu.edu/~goldbe/papers/nsec5.html
+
+https://eprint.iacr.org/2017/099.pdf
+
+
+
+
