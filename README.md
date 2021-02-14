@@ -107,7 +107,7 @@ Metadata protection:
 
 Convenience, Usability:
 
-**4. Reasonable Latency** (<5s, to allow for IM [XXX])
+**4. Reasonable Latency** (<5s, to allow for IM)
 
 **5. Reasonable Bandwidth** (not specified, mobile data plan in undeveloped countries)
 
