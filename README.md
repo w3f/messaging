@@ -1,4 +1,4 @@
-# A Decentralised Privacy-Preserving Communication Protocol
+# "Whisper v2.0": A Decentralised Privacy-Preserving Communication Protocol
 
 > Messaging for Web3.
 
